@@ -58,6 +58,9 @@ export function run(app: Application, server: ServerInfo, cb ?: (err?: string | 
     let cmd, key;
     if (utils.isLocal(server.host)) {
         let options: string[] = [];
+        logger.info("The first item of options is cmd");
+        cmd = app.get(Constants.RESERVED.MAIN);
+        options.push(cmd);
         if (!!server.args) {
             if (typeof server.args === 'string') {
                 options.push(server.args.trim());
@@ -65,8 +68,7 @@ export function run(app: Application, server: ServerInfo, cb ?: (err?: string | 
                 options = options.concat(server.args);
             }
         }
-        cmd = app.get(Constants.RESERVED.MAIN);
-        options.push(cmd);
+
         options.push(util.format('env=%s', env));
         for (key in server) {
             if (key === Constants.RESERVED.CPU) {
@@ -201,7 +203,7 @@ export function localrun(cmd: string, host: string, options: string[], callback 
  */
 let spawnProcess = function (command: string, host: string, options: string[], cb ?: (result: string | number) => void) {
     let child = null;
-
+    
     if (env === Constants.RESERVED.ENV_DEV) {
         child = cp.spawn(command, options);
         let prefix = command === Constants.COMMAND.SSH ? '[' + host + '] ' : '';
