@@ -240,7 +240,7 @@ let _checkCanRequire = (path: string) => {
 
 /**
  * Configure custom logger.
- */ 
+ */
 let configLogger = function (app: Application) {
     if (process.env.POMELO_LOGGER !== 'off') {
         let env = app.get(Constants.RESERVED.ENV);
