@@ -68,6 +68,7 @@ export function startModules(modules: IModule[], cb: (err?: Error) => void) {
 
 /**
  * Append the default system admin modules
+ * TODO: module's path ? 
  */
 export function registerDefaultModules(isMaster: boolean, app: Application, closeWatcher: boolean) {
     if (!closeWatcher) {
@@ -85,8 +86,8 @@ export function registerDefaultModules(isMaster: boolean, app: Application, clos
             app.registerAdmin(admin.modules.nodeInfo);
         }
         app.registerAdmin(OnlineUserModule);
-        app.registerAdmin(admin.modules.monitorLog, { path: pathUtil.getLogPath(app.getBase()) });
-        app.registerAdmin(admin.modules.scripts, { app: app, path: pathUtil.getScriptPath(app.getBase()) });
+        app.registerAdmin(admin.modules.monitorLog, { path: pathUtil.getLogPath(app.getPkgBase()) });
+        app.registerAdmin(admin.modules.scripts, { app: app, path: pathUtil.getScriptPath(app.getPkgBase()) });
         if (os.platform() !== Constants.PLATFORM.WIN) {
             app.registerAdmin(admin.modules.profiler);
         }

@@ -38,7 +38,7 @@ export class DictionaryComponent implements IComponent {
         this.app = app;
 
         // Set user dictionary
-        let p = path.join(app.getBase(), '/config/dictionary');
+        let p = path.join(app.getBase(), '../config/dictionary');
         if (!!opts && !!opts.dict) {
             p = opts.dict;
         }

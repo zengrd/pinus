@@ -173,17 +173,22 @@ export class Application {
      * Initialize the server.
      *
      *   - setup default configuration
+     * 
+     *   - 普通模式下pkg_base 和 pkg 是一样的，打包成PKG时不一样
      */
     init(opts ?: ApplicationOptions) {
         opts = opts || {};
-        let base = opts.base || path.dirname(require.main.filename);
+        let base = opts.base || process.cwd();
         this.set(Constants.RESERVED.BASE, base);
         this.base = base;
+        let pkg_base = opts.base || path.dirname(process.argv[1]);
+        this.set(Constants.RESERVED.PKG_BASE, pkg_base);
+        
 
         appUtil.defaultConfiguration(this);
 
         this.state = STATE_INITED;
-        logger.info('application inited: %j', this.getServerId());
+        logger.info('application inited: %j, base:%s, pkg_base:%s', this.getServerId(), base, pkg_base);
     }
 
     /**
@@ -192,6 +197,8 @@ export class Application {
      *  // cwd: /home/game/
      *  pinus start
      *  // app.getBase() -> /home/game
+     * 
+     * // app.getPkgBase -> virtual filesystem in PKG package
      *
      * @return {String} application base path
      *
@@ -199,6 +206,10 @@ export class Application {
      */
     getBase() {
         return this.get(Constants.RESERVED.BASE);
+    }
+
+    getPkgBase() {
+        return this.get(Constants.RESERVED.PKG_BASE);
     }
 
     /**
@@ -209,7 +220,7 @@ export class Application {
      * @memberOf Application
      */
     require(ph: string) {
-        return require(path.join(this.getBase(), ph));
+        return require(path.join(this.getPkgBase(), ph));
     }
 
     /**
@@ -662,6 +673,7 @@ export class Application {
     set(setting: Constants.KEYWORDS.ROUTE, val: RouteMaps, attach?: boolean): Application;
     set(setting: Constants.KEYWORDS.BEFORE_STOP_HOOK, val: BeforeStopHookFunction, attach?: boolean): Application;
     set(setting: Constants.RESERVED.BASE, val: string, attach?: boolean): Application;
+    set(setting: Constants.RESERVED.PKG_BASE, val: string, attach?: boolean): Application;
     set(setting: Constants.RESERVED.ENV, val: string, attach?: boolean): Application;
     set(setting: Constants.RESERVED.GLOBAL_ERROR_HANDLER, val: ResponseErrorHandler, attach?: boolean): Application;
     set(setting: Constants.RESERVED.ERROR_HANDLER, val: ResponseErrorHandler, attach?: boolean): Application;
@@ -697,6 +709,7 @@ export class Application {
     get(setting: Constants.KEYWORDS.ROUTE): RouteMaps;
     get(setting: Constants.KEYWORDS.BEFORE_STOP_HOOK): BeforeStopHookFunction;
     get(setting: Constants.RESERVED.BASE): string;
+    get(setting: Constants.RESERVED.PKG_BASE): string;
     get(setting: Constants.RESERVED.ENV): string;
     get(setting: Constants.RESERVED.GLOBAL_ERROR_HANDLER): ResponseErrorHandler;
     get(setting: Constants.RESERVED.ERROR_HANDLER): ResponseErrorHandler;

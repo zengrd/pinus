@@ -17,16 +17,16 @@ export enum KEYWORDS {
 }
 
 export enum FILEPATH  {
-    MASTER = '/config/master.json',
-    SERVER = '/config/servers.json',
-    CRON = '/config/crons.json',
-    LOG = '/config/log4js.json',
+    MASTER = '../config/master.json',
+    SERVER = '../config/servers.json',
+    CRON = '../config/crons.json',
+    LOG = '../config/log4js.json',
     SERVER_PROTOS = '../config/serverProtos.json',
     CLIENT_PROTOS = '../config/clientProtos.json',
-    MASTER_HA = '/config/masterha.json',
+    MASTER_HA = '../config/masterha.json',
     LIFECYCLE = '/lifecycle.js',
     SERVER_DIR = '/app/servers/',
-    CONFIG_DIR = '/config'
+    CONFIG_DIR = '../config'
 }
 
 export enum DIR  {
@@ -41,6 +41,7 @@ export enum DIR  {
 
 export enum RESERVED  {
     BASE = 'base',
+    PKG_BASE = 'pkg_base',
     MAIN = 'main',
     MASTER = 'master',
     SERVERS = 'servers',

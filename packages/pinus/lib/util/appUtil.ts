@@ -292,7 +292,7 @@ let parseArgs = function (args: string[]) {
  *
  */
 let loadLifecycle = function (app: Application) {
-    let filePath = path.join(app.getBase(), Constants.FILEPATH.SERVER_DIR, app.serverType, Constants.FILEPATH.LIFECYCLE);
+    let filePath = path.join(app.getPkgBase(), Constants.FILEPATH.SERVER_DIR, app.serverType, Constants.FILEPATH.LIFECYCLE);
     try {
         filePath = require.resolve(filePath);
     } catch(err) {
