@@ -251,7 +251,7 @@ let initHandler = function (app: Application, opts: HandlerServiceOptions) {
  */
 let loadCronHandlers = function (app: Application, manualReload = false) {
     let all: { [key: string]: any } = {};
-    let p = pathUtil.getCronPath(app.getBase(), app.getServerType());
+    let p = pathUtil.getCronPath(app.getPkgBase(), app.getServerType());
     if (p) {
         let crons = Loader.load(p, app, manualReload, true, LoaderPathType.PINUS_CRONNER);
         for (let name in crons) {

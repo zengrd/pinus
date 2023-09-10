@@ -128,7 +128,7 @@ export class RemoteComponent implements IComponent {
         if (sysPath !== null) {
             paths.push(pathUtil.remotePathRecord('sys', serverType, sysPath, relativePath));
         }
-        let userPath = pathUtil.getUserRemotePath(this.app.getBase(), serverType);
+        let userPath = pathUtil.getUserRemotePath(this.app.getPkgBase(), serverType);
         if (userPath !== null) {
             paths.push(pathUtil.remotePathRecord('user', serverType, userPath, relativePath));
         }

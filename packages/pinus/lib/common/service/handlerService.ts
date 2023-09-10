@@ -46,7 +46,7 @@ export class HandlerService {
 
         // 添加默认路径到ServerInfo中
         let info = app.getCurrentServer();
-        let handlerPath = info.serverType ? pathUtil.getHandlerPath(app.getBase(), info.serverType) : undefined;
+        let handlerPath = info.serverType ? pathUtil.getHandlerPath(app.getPkgBase(), info.serverType) : undefined;
         info.handlerPaths = [];
         if (handlerPath) {
             info.handlerPaths.push(handlerPath);
@@ -178,7 +178,7 @@ export function manualReloadHandlers(app: Application) {
     if (!app.components.__server__) {
         return;
     }
-    let p = pathUtil.getHandlerPath(app.getBase(), app.serverType);
+    let p = pathUtil.getHandlerPath(app.getPkgBase(), app.serverType);
     if (!p) {
         return;
     }
@@ -187,7 +187,7 @@ export function manualReloadHandlers(app: Application) {
 }
 
 let watchHandlers = function (app: Application, handlerMap: HandlerMap) {
-    let p = pathUtil.getHandlerPath(app.getBase(), app.serverType);
+    let p = pathUtil.getHandlerPath(app.getPkgBase(), app.serverType);
     if (!!p) {
         fs.watch(p, function (event, name) {
             if (event === 'change') {

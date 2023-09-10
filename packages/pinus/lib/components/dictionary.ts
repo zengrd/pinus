@@ -57,7 +57,7 @@ export class DictionaryComponent implements IComponent {
         if (!this.ignoreAutoRouter) {
             // Load all the handler files
             for (let serverType in servers) {
-                let p = pathUtil.getHandlerPath(this.app.getBase(), serverType);
+                let p = pathUtil.getHandlerPath(this.app.getPkgBase(), serverType);
                 if (!p) {
                     continue;
                 }

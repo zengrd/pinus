@@ -635,6 +635,40 @@ export class Application {
         }, cancelShutDownTimer);
     }
 
+
+    /**
+     * hotfix components.
+     *
+     * @param  {string} filePath 热更新路径
+     */
+    hotfix(filePath: string){
+        let self = this;
+        let hotfixDir:string = path.join(Constants.FILEPATH.HOTFIX_DIR, filePath);
+        let modulePath:string;
+        fs.stat(hotfixDir, (err, stat)=>{
+            if(err){
+                let baseDir = path.join(self.getBase(), filePath);
+                fs.stat(baseDir, (_err, _stat)=>{
+                    if(_err){
+                        logger.warn('hotfix dir or file is not exist!');
+                        return;
+                    }
+                    hotfixDir = baseDir
+                });
+            }
+            if(stat.isDirectory()){
+                // 更新目录里所有的文件
+            }
+            else{
+                // 更新单个文件
+                modulePath = path.join(self.getBase(), filePath);
+                
+            }
+        })
+
+
+    }
+
     /**
      * Assign `setting` to `val`, or return `setting`'s value.
      *

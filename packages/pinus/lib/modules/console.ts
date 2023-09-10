@@ -43,6 +43,12 @@ export class ConsoleModule implements IModule {
                 }
                 this.app.stop(true);
                 break;
+            case 'hotfix':
+                if (agent.type === Constants.RESERVED.MASTER) {
+                    return;
+                }
+                this.app.hotfix(msg.filePath);
+                break;
             case 'list':
                 let serverType = agent.type;
                 let pid = process.pid;
@@ -115,6 +121,9 @@ export class ConsoleModule implements IModule {
             case 'add':
                 add(app, agent, msg, cb);
                 break;
+            case 'hotfix':
+                hotfix(app, agent, msg, cb);
+                break;
             case 'addCron':
                 addCron(app, agent, msg, cb);
                 break;
@@ -167,7 +176,7 @@ let kill = function (app: Application, agent: MasterAgent, msg: any, cb: MasterC
 };
 
 let stop = function (app: Application, agent: MasterAgent, msg: any, cb: MasterCallback) {
-    let serverIds = msg.ids;
+    let serverIds = msg.serverTypes;
     if (!!serverIds.length) {
         let servers = app.getServers();
         app.set(Constants.RESERVED.STOP_SERVERS, serverIds);
@@ -277,6 +286,35 @@ let add = function (app: Application, agent: MasterAgent, msg: any, cb: MasterCa
         startServer(app, msg, cb);
     }
     reset(ServerInfo);
+};
+
+
+let hotfix = function (app: Application, agent: MasterAgent, msg: any, cb: MasterCallback) {
+    let serverTypes = msg.serverTypes;
+    if (!!serverTypes.length) {
+        let curServerTypes = app.getServerTypes();
+        for (let i = 0; i < serverTypes.length; i++) {
+            let serverType = serverTypes[i];
+            if(serverType === 'master'){
+                setTimeout(function () {
+                    app.hotfix(msg.filePath);
+                }, Constants.TIME.TIME_WAIT_HOTFIX);
+            }
+            else if (!curServerTypes.includes(serverType)) {
+                utils.invokeCallback(cb, new Error(`Cannot find the serverType ${serverType} to hotfix.`), null);
+                continue;
+            } else {
+                agent.notifyByType(serverType, ConsoleModule.moduleId, { signal: msg.signal, filePath: msg.filePath});
+            }
+        }
+        utils.invokeCallback(cb, null, { status: 'part' });
+    } else {
+        agent.notifyAll(ConsoleModule.moduleId, { signal: msg.signal, filePath: msg.filePath});
+        setTimeout(function () {
+            app.hotfix(msg.filePath);
+            utils.invokeCallback(cb, null, { status: 'all' });
+        }, Constants.TIME.TIME_WAIT_HOTFIX);
+    }
 };
 
 let addCron = function (app: Application, agent: MasterAgent, msg: any, cb: MasterCallback) {

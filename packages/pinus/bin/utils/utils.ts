@@ -128,3 +128,25 @@ export function terminal(signal: string, opts: any) {
             });
     });
 }
+
+/**
+ * hotfix application.
+ *
+ */
+
+export function hotfix(signal: string, opts: any) {
+    let id = 'pinus_hotfix_' + Date.now();
+    connectToMaster(id, opts, function (client) {
+        client.request(co.moduleId, {
+            signal: signal, serverTypes: opts.serverTypes, filePath: opts.filePath
+        }, function (err, msg) {
+                if (err) {
+                    console.error(err);
+                }
+                else{
+                    console.log(msg);
+                }
+                process.exit(0);
+            });
+    });
+}

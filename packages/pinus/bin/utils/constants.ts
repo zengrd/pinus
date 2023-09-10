@@ -9,6 +9,7 @@ export let KILL_CMD_WIN = 'taskkill /im node.exe /f';
 
 export let CUR_DIR = process.cwd();
 export let DEFAULT_GAME_SERVER_DIR = CUR_DIR;
+export let DEFAULT_HOTFIX_DIR = ''
 export let DEFAULT_USERNAME = 'admin';
 export let DEFAULT_PWD = 'admin';
 export let DEFAULT_ENV = 'development';

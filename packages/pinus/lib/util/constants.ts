@@ -26,7 +26,8 @@ export enum FILEPATH  {
     MASTER_HA = '../config/masterha.json',
     LIFECYCLE = '/lifecycle.js',
     SERVER_DIR = '/app/servers/',
-    CONFIG_DIR = '../config'
+    CONFIG_DIR = '../config',
+    HOTFIX_DIR = '../hotfix'
 }
 
 export enum DIR  {
@@ -103,6 +104,7 @@ export enum SIGNAL  {
 
 export enum TIME  {
     TIME_WAIT_STOP = 3 * 1000,
+    TIME_WAIT_HOTFIX = 4 * 1000,
     TIME_WAIT_KILL = 5 * 1000,
     TIME_WAIT_RESTART = 5 * 1000,
     TIME_WAIT_COUNTDOWN = 10 * 1000,
