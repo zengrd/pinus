@@ -27,14 +27,15 @@ import { BackendSessionService } from './common/service/backendSessionService';
 import { ChannelService, ChannelServiceOptions } from './common/service/channelService';
 import { SessionComponent } from './components/session';
 import { ServerComponent } from './components/server';
-import { RemoteComponent, RemoteComponentOptions } from './components/remote';
-import { ProxyComponent, ProxyComponentOptions, RouteFunction, RouteMaps } from './components/proxy';
+import { RemoteComponent, RemoteComponentOptions, manualReloadRemoters } from './components/remote';
+import { ProxyComponent, ProxyComponentOptions, RouteFunction, RouteMaps, manualReloadProxies } from './components/proxy';
 import { ProtobufComponent, ProtobufComponentOptions } from './components/protobuf';
 import { MonitorComponent } from './components/monitor';
 import { MasterComponent } from './components/master';
 import { ConnectorComponent, ConnectorComponentOptions } from './components/connector';
 import { ConnectionComponent } from './components/connection';
 import { SessionService } from './common/service/sessionService';
+import { manualReloadHandlers } from './common/service/handlerService';
 import { ObjectType } from './interfaces/define';
 import { IModule, IModuleFactory } from 'pinus-admin';
 import { ChannelComponent } from './components/channel';
@@ -43,7 +44,7 @@ import { AfterHandlerFilter, BeforeHandlerFilter, IHandlerFilter } from './inter
 import { MailStationErrorHandler, RpcFilter, RpcMsg } from 'pinus-rpc';
 import { ModuleRecord } from './util/moduleUtil';
 import { ApplicationEventContructor, IPlugin } from './interfaces/IPlugin';
-import { Cron, ResponseErrorHandler } from './server/server';
+import { Cron, ResponseErrorHandler, manualReloadCrons } from './server/server';
 import { RemoterProxy } from './util/remoterHelper';
 import { FrontendOrBackendSession, ISession, MonitorOptions, ScheduleOptions, SID, UID } from './index';
 
@@ -431,26 +432,13 @@ export class Application {
         if (!!realPath && !!reload) {
             const watcher = fs.watch(realPath, function (event, filename) {
                 if (event === 'change') {
-                    self.clearRequireCache(require.resolve(realPath));
+                    utils.clearRequireCache(require.resolve(realPath));
                     watcher.close();
                     self.loadConfigBaseApp(key, val, reload);
 
                 }
             });
         }
-    }
-
-    clearRequireCache(path: string) {
-        const moduleObj = require.cache[path];
-        if (!moduleObj) {
-            logger.warn('can not find module of truepath', path);
-            return;
-        }
-        if (moduleObj.parent) {
-            //    console.log('has parent ',moduleObj.parent);
-            moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
-        }
-        delete require.cache[path];
     }
 
     /**
@@ -635,38 +623,60 @@ export class Application {
         }, cancelShutDownTimer);
     }
 
+    reload():void {
+        manualReloadHandlers(this);
+        manualReloadRemoters(this);
+        manualReloadProxies(this);
+        manualReloadCrons(this);
+    }
+
 
     /**
      * hotfix components.
      *
      * @param  {string} filePath 热更新路径
      */
-    hotfix(filePath: string){
+    hotfix(relativePath: string){
         let self = this;
-        let hotfixDir:string = path.join(Constants.FILEPATH.HOTFIX_DIR, filePath);
-        let modulePath:string;
-        fs.stat(hotfixDir, (err, stat)=>{
+        let hotfixPath: string = path.join(self.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath);
+        let originalFilePath = path.join(self.getPkgBase(), relativePath);
+        console.log(hotfixPath, originalFilePath)
+        fs.stat(hotfixPath, (err, stat)=>{
             if(err){
-                let baseDir = path.join(self.getBase(), filePath);
-                fs.stat(baseDir, (_err, _stat)=>{
+                fs.stat(originalFilePath, (_err, _stat)=>{
                     if(_err){
                         logger.warn('hotfix dir or file is not exist!');
                         return;
                     }
-                    hotfixDir = baseDir
+                    else{
+                        if(_stat.isDirectory()){
+                            // 递归清除目录下所有文件的缓存
+                            utils.clearRequireCaches(originalFilePath);
+                        }
+                        else{
+                            utils.clearRequireCache(originalFilePath);
+                        }
+                    }
                 });
             }
-            if(stat.isDirectory()){
-                // 更新目录里所有的文件
-            }
             else{
-                // 更新单个文件
-                modulePath = path.join(self.getBase(), filePath);
-                
+                if(stat.isDirectory()){
+                    // 递归文件夹中重载require 文件，替换require的文件
+                    console.log('stat.isDirector ???')
+                    utils.replaceRequireFiles(self, relativePath);
+                    utils.clearRequireCaches(originalFilePath);
+                }
+                else{
+                    // 重载require 文件，替换require的文件
+                    utils.replaceRequireFile(self, relativePath);
+                    utils.clearRequireCache(originalFilePath);
+                    
+                }
+                utils.overrideRequire();
+
             }
         })
-
-
+        self.reload();
     }
 
     /**

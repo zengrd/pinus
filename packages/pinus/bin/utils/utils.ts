@@ -144,7 +144,7 @@ export function hotfix(signal: string, opts: any) {
                     console.error(err);
                 }
                 else{
-                    console.log(msg);
+                    console.log("hotfix success, ", msg);
                 }
                 process.exit(0);
             });

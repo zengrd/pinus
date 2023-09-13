@@ -1,4 +1,5 @@
 import * as os from 'os';
+import * as fs from 'fs';
 import * as util from 'util';
 import {exec} from 'child_process';
 import {getLogger} from 'pinus-logger';
@@ -9,6 +10,110 @@ import {Application} from '../application';
 import * as path from 'path';
 
 let logger = getLogger('pinus', path.basename(__filename));
+
+/**
+ *  清理被引用的模块缓存
+ */
+export function clearRequireCache(path: string) {
+    const moduleObj = require.cache[path];
+    if (!moduleObj) {
+        logger.warn('can not find module of truepath', path);
+        return;
+    }
+    if (moduleObj.parent) {
+        //    console.log('has parent ',moduleObj.parent);
+        moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
+    }
+    delete require.cache[path];
+}
+
+export function clearRequireCaches(dir: string){
+    const files = fs.readdirSync(dir); // 读取文件夹中的文件和文件夹
+
+    files.forEach((file) => {
+      const filePath = path.join(dir, file); // 构建文件或文件夹的完整路径
+  
+      if (fs.statSync(filePath).isDirectory()) {
+        // 如果是文件夹，则递归调用自身遍历子文件夹
+        clearRequireCaches(filePath);
+      } else {
+        // 执行你的操作，例如打印文件路径
+        clearRequireCache(filePath);
+      }
+    });
+}
+
+/**
+ *  魔改module require的模块
+ *  如果有hotfix 文件就替换成hotfix 文件里面的值
+ *  如果没有hotfix文件，就只是正常require文件
+ *  Todo
+ */
+let _replacePathMap: { [key: string]: string } = {};
+
+export function overrideRequire() {
+    console.log(_replacePathMap)
+    const Module = require('module');
+    const originalLoad = Module._load;
+    Module._load = function (modulePath: string, ...rest: any[]) {
+        console.info('start to require ' + modulePath);
+        let _modulePath = require.resolve(modulePath);
+        if(_replacePathMap.hasOwnProperty(_modulePath)){
+            return originalLoad.apply(Module, [_replacePathMap[_modulePath], ...rest]);
+        }
+        return originalLoad.apply(Module, [modulePath, ...rest]);
+    }
+};
+
+/**
+ *  增加单个文件为覆盖的内容
+ */
+
+export function replaceRequireFile(app: Application, relativePath: string){
+    let hotfixFilePath = require.resolve(path.join(app.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath));
+    const fileExtension = path.extname(relativePath);
+    if(fileExtension === '.ts'){
+        relativePath = relativePath.replace(/\.ts$/, '.js');
+    }
+    let originalFilePath = require.resolve(path.join(app.getPkgBase(), relativePath));
+    // 原始文件存在的情况
+    if(fs.existsSync(originalFilePath) && fs.statSync(originalFilePath).isFile()){
+        if(!_replacePathMap.hasOwnProperty(originalFilePath)){
+            console.log('add _pathMap', originalFilePath, hotfixFilePath);
+            _replacePathMap[originalFilePath] = hotfixFilePath;
+        }
+    }
+}
+
+/**
+ *  按文件夹增加多个文件到_pathMap中
+ */
+export function replaceRequireFiles(app: Application, relativeDir: string){
+    console.log('start to replaceRequireFiles')
+    let hotfixFileDir = path.join(app.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativeDir);
+    let hotfixDir = path.join(app.getBase(), Constants.FILEPATH.HOTFIX_DIR);
+    console.log('replaceRequireFiles', hotfixFileDir, hotfixDir)
+    function recursivelyReadFilesSync(dir: string){
+        const files = fs.readdirSync(dir); // 读取文件夹中的文件和文件夹
+        files.forEach((file) => {
+          const filePath = path.join(dir, file); // 构建文件或文件夹的完整路径
+      
+          if (fs.statSync(filePath).isDirectory()) {
+            // 如果是文件夹，则递归调用自身遍历子文件夹
+            recursivelyReadFilesSync(filePath);
+          } else {
+            // 执行操作，替换require的路径
+            const fileExtension = path.extname(filePath);
+            if (fileExtension === '.js' || fileExtension === '.ts' || fileExtension === '.json') {
+                let relativePath = path.relative(hotfixDir, filePath);
+                replaceRequireFile(app, relativePath);
+            }
+          }
+        });
+    }
+    // 通过hotfix 目录进行遍历
+    recursivelyReadFilesSync(hotfixFileDir);
+}
 
 
 /**
