@@ -75,7 +75,8 @@ export enum RESERVED  {
     CLIENT = 'client',
     STARTID = 'startId',
     STOP_SERVERS = 'stop_servers',
-    SSH_CONFIG_PARAMS = 'ssh_config_params'
+    SSH_CONFIG_PARAMS = 'ssh_config_params',
+    OVERRIDE_REQUIRE = 'override_require'
 }
 
 export enum COMMAND  {

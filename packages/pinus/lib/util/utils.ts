@@ -8,33 +8,57 @@ import {pinus} from '../pinus';
 import {ServerInfo} from './constants';
 import {Application} from '../application';
 import * as path from 'path';
+import { stringify } from 'querystring';
 
 let logger = getLogger('pinus', path.basename(__filename));
-let _replacePathMap: { [key: string]: string } = {};
+const BASEDIR = path.dirname(process.argv[1]);
+const HOTFIXDIR = path.join(process.cwd(), Constants.FILEPATH.HOTFIX_DIR);
+/**
+ *  判断模块是否在hotfix模块中
+ */
+function isPathInHotfixDir(ModulePath: string) :boolean{
+    const normalHotfixPath = path.normalize(path.resolve(HOTFIXDIR));
+    let normalModulePath = path.normalize(path.resolve(ModulePath));
+    return normalModulePath.startsWith(normalHotfixPath);
+}
+
+function isPathInBaseDir(ModulePath: string) :boolean{
+    const normalBasePath = path.normalize(path.resolve(BASEDIR));
+    let normalModulePath = path.normalize(path.resolve(ModulePath));
+    return normalModulePath.startsWith(normalBasePath);
+}
+
 /**
  *  清理被引用的模块缓存, 如果有替代的hotfix模块也同时进行清理
  */
-export function clearRequireCache(path: string) {
-    console.log('clearRequireCache',path);
-    const moduleObj = require.cache[path];
+export function clearRequireCache(mpath: string) {
+    console.log('clearRequireCache',mpath);
+    const moduleObj = require.cache[mpath];
+    let replacePath: string;
+    let relatviePath: string;
     if (moduleObj) {
         if (moduleObj.parent) {
             //    console.log('has parent ',moduleObj.parent);
             moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
         }
-        delete require.cache[path];
+        delete require.cache[mpath];
 
     }
-    if(_replacePathMap.hasOwnProperty(path)){
-        const replacePath = _replacePathMap[path];
-        const replaceModuleObj = require.cache[path];
-        if (replaceModuleObj) {
-            if (replaceModuleObj.parent) {
-                //    console.log('has parent ',moduleObj.parent);
-                replaceModuleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
-            }
-            delete require.cache[path];
+    if(isPathInHotfixDir(mpath)){
+        relatviePath = path.relative(HOTFIXDIR, mpath);
+        replacePath = path.resolve(path.join(BASEDIR, relatviePath));
+    }
+    else{
+        relatviePath = path.relative(BASEDIR, mpath);
+        replacePath = path.resolve(path.join(HOTFIXDIR, relatviePath));
+    }
+    const replaceModuleObj = require.cache[replacePath];
+    if (replaceModuleObj) {
+        if (replaceModuleObj.parent) {
+            //    console.log('has parent ',moduleObj.parent);
+            replaceModuleObj.parent.children.splice(replaceModuleObj.parent.children.indexOf(replaceModuleObj), 1);
         }
+        delete require.cache[replacePath];
 
     }
 }
@@ -57,70 +81,55 @@ export function clearRequireCaches(dir: string){
 
 /**
  *  魔改module require的模块
- *  如果有hotfix 文件就替换成hotfix 文件里面的值
+ *  如果有hotfix 文件就优先加载hotfix 里面的文件
  *  如果没有hotfix文件，就只是正常require文件
  */
 export function overrideRequire() {
-    console.log('start to replace ',_replacePathMap);
     const Module = require('module');
     const originalLoad = Module._load;
-    Module._load = function (modulePath: string, ...rest: any[]) {
-        //let _modulePath = require.resolve(modulePath);
-        let _modulePath = modulePath
-        console.info('require.resolve Path ',modulePath,_modulePath);
-        if(_replacePathMap.hasOwnProperty(_modulePath)){
-            return originalLoad.apply(Module, [_replacePathMap[_modulePath], ...rest]);
+    let modulePath: string;
+    let hotfixFilePath: string;
+    let baseFilePath: string;
+    Module._load = function (request: string, parent: any, ...rest: any[]) {
+        // 相对路径先拼凑成绝对路径,绝对路径就直接使用
+        if(path.isAbsolute(request)){
+            modulePath = request;
         }
-        return originalLoad.apply(Module, [modulePath, ...rest]);
+        else{
+            const parentPath = parent.filename;
+            modulePath = path.join(path.dirname(parentPath), request);
+        }
+        // 判断是否在hotfix 或者 base 目录下
+        if(isPathInHotfixDir(modulePath)){
+            hotfixFilePath = modulePath;
+            baseFilePath = path.resolve(path.join(BASEDIR, path.relative(HOTFIXDIR, modulePath)));
+        }
+        else if(isPathInBaseDir(modulePath)){
+            baseFilePath = modulePath;
+            hotfixFilePath = path.resolve(path.join(HOTFIXDIR, path.relative(BASEDIR, modulePath)));
+            // 兼容一下 hotfix 中的 .ts 文件吧
+            if(!(fs.existsSync(hotfixFilePath) && fs.statSync(hotfixFilePath).isFile())){
+                hotfixFilePath.replace(/\.js$/, '.ts');
+            }
+        }
+        // 先尝试加载hotfixFilePath，不成功，再加载BaseFilePath
+        try{
+            return originalLoad.apply(Module, [hotfixFilePath, parent, ...rest]);
+        }
+        catch(err){
+            try{
+                
+                return originalLoad.apply(Module, [baseFilePath, parent, ...rest]);
+            }
+            catch(err){
+                // 内置库或者第三方库
+                return originalLoad.apply(Module, [modulePath, parent, ...rest]);
+            }
+            
+        }
     }
 };
 
-/**
- *  增加单个文件为覆盖的内容
- */
-
-export function replaceRequireFile(app: Application, relativePath: string){
-    let hotfixFilePath = path.join(app.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath);
-    const fileExtension = path.extname(relativePath);
-    if(fileExtension === '.ts'){
-        relativePath = relativePath.replace(/\.ts$/, '.js');
-    }
-    let originalFilePath = path.join(app.getPkgBase(), relativePath);
-    // 原始文件存在的情况
-    if(fs.existsSync(originalFilePath) && fs.statSync(originalFilePath).isFile()){
-        if(!_replacePathMap.hasOwnProperty(originalFilePath)){
-            _replacePathMap[originalFilePath] = hotfixFilePath;
-        }
-    }
-}
-
-/**
- *  按文件夹增加多个文件到_pathMap中
- */
-export function replaceRequireFiles(app: Application, relativeDir: string){
-    let hotfixFileDir = path.join(app.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativeDir);
-    let hotfixDir = path.join(app.getBase(), Constants.FILEPATH.HOTFIX_DIR);
-    function recursivelyReadFilesSync(dir: string){
-        const files = fs.readdirSync(dir); // 读取文件夹中的文件和文件夹
-        files.forEach((file) => {
-          const filePath = path.join(dir, file); // 构建文件或文件夹的完整路径
-      
-          if (fs.statSync(filePath).isDirectory()) {
-            // 如果是文件夹，则递归调用自身遍历子文件夹
-            recursivelyReadFilesSync(filePath);
-          } else {
-            // 执行操作，替换require的路径
-            const fileExtension = path.extname(filePath);
-            if (fileExtension === '.js' || fileExtension === '.ts' || fileExtension === '.json') {
-                let relativePath = path.relative(hotfixDir, filePath);
-                replaceRequireFile(app, relativePath);
-            }
-          }
-        });
-    }
-    // 通过hotfix 目录进行遍历
-    recursivelyReadFilesSync(hotfixFileDir);
-}
 
 
 /**

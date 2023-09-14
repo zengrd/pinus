@@ -273,22 +273,13 @@ let loadCronHandlers = function (app: Application, manualReload = false) {
     }
     return all;
 };
-const clearRequireCache = function (path: string) {
-    const moduleObj = require.cache[path];
-    if (!moduleObj) {
-        return;
-    }
-    if (moduleObj.parent) {
-        moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
-    }
-    delete require.cache[path];
-};
+
 
 function _checkCanRequire(path: string, manualReload = false) {
     try {
         path = require.resolve(path);
         if (manualReload) {
-            clearRequireCache(path);
+            utils.clearRequireCache(path);
         }
     } catch (err) {
         return null;

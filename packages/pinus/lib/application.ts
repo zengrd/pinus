@@ -184,8 +184,8 @@ export class Application {
         this.base = base;
         let pkg_base = opts.base || path.dirname(process.argv[1]);
         this.set(Constants.RESERVED.PKG_BASE, pkg_base);
-        
-
+        // 初始设定未重载require
+        this.set(Constants.RESERVED.OVERRIDE_REQUIRE, false);
         appUtil.defaultConfiguration(this);
 
         this.state = STATE_INITED;
@@ -637,6 +637,11 @@ export class Application {
      * @param  {string} filePath 热更新路径
      */
     hotfix(relativePath: string){
+        // override require function only first
+        if(!this.get(Constants.RESERVED.OVERRIDE_REQUIRE)){
+            utils.overrideRequire();
+            this.set(Constants.RESERVED.OVERRIDE_REQUIRE, true);
+        }
         let self = this;
         let hotfixPath: string = path.join(self.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath);
         let originalFilePath = path.join(self.getPkgBase(), relativePath);
@@ -645,19 +650,16 @@ export class Application {
             if(stat.isDirectory()){
                 // 递归文件夹中重载require 文件，替换require的文件
                 console.log('stat.isDirector ???')
-                utils.replaceRequireFiles(self, relativePath);
-                utils.clearRequireCaches(originalFilePath);
                 utils.clearRequireCaches(hotfixPath);
+                utils.clearRequireCaches(originalFilePath);
             }
             else{
                 // 重载require 文件，替换require的文件
-                utils.replaceRequireFile(self, relativePath);
-                utils.clearRequireCache(originalFilePath);
                 utils.clearRequireCache(hotfixPath);
+                utils.clearRequireCache(originalFilePath);
                 
             }
-            utils.overrideRequire();
-
+            
         } catch(err){
             try{
                 const _stat = fs.statSync(originalFilePath);
@@ -669,7 +671,7 @@ export class Application {
                     utils.clearRequireCache(originalFilePath);
                 }
             } catch(_err){
-                logger.warn('hotfix dir/file is not exist!');
+                logger.warn('under hotfix and basedir dir/file is not exist!');
                 return;
             }
 
@@ -716,6 +718,7 @@ export class Application {
     set(setting: Constants.KEYWORDS.BEFORE_STOP_HOOK, val: BeforeStopHookFunction, attach?: boolean): Application;
     set(setting: Constants.RESERVED.BASE, val: string, attach?: boolean): Application;
     set(setting: Constants.RESERVED.PKG_BASE, val: string, attach?: boolean): Application;
+    set(setting: Constants.RESERVED.OVERRIDE_REQUIRE, val: boolean, attach?: boolean): Application;
     set(setting: Constants.RESERVED.ENV, val: string, attach?: boolean): Application;
     set(setting: Constants.RESERVED.GLOBAL_ERROR_HANDLER, val: ResponseErrorHandler, attach?: boolean): Application;
     set(setting: Constants.RESERVED.ERROR_HANDLER, val: ResponseErrorHandler, attach?: boolean): Application;
@@ -752,6 +755,7 @@ export class Application {
     get(setting: Constants.KEYWORDS.BEFORE_STOP_HOOK): BeforeStopHookFunction;
     get(setting: Constants.RESERVED.BASE): string;
     get(setting: Constants.RESERVED.PKG_BASE): string;
+    get(setting: Constants.RESERVED.OVERRIDE_REQUIRE): boolean;
     get(setting: Constants.RESERVED.ENV): string;
     get(setting: Constants.RESERVED.GLOBAL_ERROR_HANDLER): ResponseErrorHandler;
     get(setting: Constants.RESERVED.ERROR_HANDLER): ResponseErrorHandler;

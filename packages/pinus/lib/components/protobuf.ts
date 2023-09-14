@@ -7,6 +7,7 @@ import { getLogger } from 'pinus-logger';
 import { Application } from '../application';
 import { IComponent } from '../interfaces/IComponent';
 import AppEvents from '../util/events';
+import { clearRequireCache } from '../util/utils';
 
 let logger = getLogger('pinus', path.basename(__filename));
 
@@ -143,18 +144,6 @@ export class ProtobufComponent implements IComponent {
         this.watchers[type] = watcher;
     }
 
-    clearRequireCache(path: string) {
-        const moduleObj = require.cache[path];
-        if (!moduleObj) {
-            logger.warn('can not find module of truepath', path);
-            return;
-        }
-        if (moduleObj.parent) {
-            //    console.log('has parent ',moduleObj.parent);
-            moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
-        }
-        delete require.cache[path];
-    }
 
     onUpdate(type: string, path: string, event: string, filename?: string, errTry?: boolean) {
         if (event !== 'change') {
@@ -162,7 +151,7 @@ export class ProtobufComponent implements IComponent {
         }
 
         let self = this;
-        this.clearRequireCache(path);
+        clearRequireCache(path);
         try {
             let protos = Protobuf.parse(require(path));
             // 预防 git checkout这样的操作导致获得的数据为空的情况
