@@ -2,7 +2,7 @@
 	"name": "pinus-workspaces",
 	"version": "0.0.1",
 	"devDependencies": {
-		"lerna": "4.0.0",
+		"lerna": "^7.3.0",
 		"lerna-relinker": "1.5.0",
 		"nyc": "15.1.0",
 		"pinus-site-tools": "1.0.6",
@@ -53,22 +53,22 @@
 		"url": "https://github.com/node-pinus/pinus.git"
 	},
 	"engines": {
-        "node": ">=12.9.0"
+		"node": ">=12.9.0"
 	},
 	"license": "MIT",
 	"private": true,
 	"workspaces": [
 		"tools/*",
 		"plugins/*",
-        "packages/pinus",
-        "packages/pinus-admin",
-        "packages/pinus-loader",
-        "packages/pinus-logger",
-        "packages/pinus-monitor",
-        "packages/pinus-protobuf",
-        "packages/pinus-protocol",
-        "packages/pinus-rpc",
-        "packages/pinus-scheduler",
+		"packages/pinus",
+		"packages/pinus-admin",
+		"packages/pinus-loader",
+		"packages/pinus-logger",
+		"packages/pinus-monitor",
+		"packages/pinus-protobuf",
+		"packages/pinus-protocol",
+		"packages/pinus-rpc",
+		"packages/pinus-scheduler",
 		"examples/simple-example/*",
 		"examples/ssl-connector/*",
 		"examples/websocket-chat/*",

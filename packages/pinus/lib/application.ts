@@ -640,42 +640,40 @@ export class Application {
         let self = this;
         let hotfixPath: string = path.join(self.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath);
         let originalFilePath = path.join(self.getPkgBase(), relativePath);
-        console.log(hotfixPath, originalFilePath)
-        fs.stat(hotfixPath, (err, stat)=>{
-            if(err){
-                fs.stat(originalFilePath, (_err, _stat)=>{
-                    if(_err){
-                        logger.warn('hotfix dir or file is not exist!');
-                        return;
-                    }
-                    else{
-                        if(_stat.isDirectory()){
-                            // 递归清除目录下所有文件的缓存
-                            utils.clearRequireCaches(originalFilePath);
-                        }
-                        else{
-                            utils.clearRequireCache(originalFilePath);
-                        }
-                    }
-                });
+        try{
+            const stat = fs.statSync(hotfixPath);
+            if(stat.isDirectory()){
+                // 递归文件夹中重载require 文件，替换require的文件
+                console.log('stat.isDirector ???')
+                utils.replaceRequireFiles(self, relativePath);
+                utils.clearRequireCaches(originalFilePath);
+                utils.clearRequireCaches(hotfixPath);
             }
             else{
-                if(stat.isDirectory()){
-                    // 递归文件夹中重载require 文件，替换require的文件
-                    console.log('stat.isDirector ???')
-                    utils.replaceRequireFiles(self, relativePath);
+                // 重载require 文件，替换require的文件
+                utils.replaceRequireFile(self, relativePath);
+                utils.clearRequireCache(originalFilePath);
+                utils.clearRequireCache(hotfixPath);
+                
+            }
+            utils.overrideRequire();
+
+        } catch(err){
+            try{
+                const _stat = fs.statSync(originalFilePath);
+                if(_stat.isDirectory()){
+                    // 递归清除目录下所有文件的缓存
                     utils.clearRequireCaches(originalFilePath);
                 }
                 else{
-                    // 重载require 文件，替换require的文件
-                    utils.replaceRequireFile(self, relativePath);
                     utils.clearRequireCache(originalFilePath);
-                    
                 }
-                utils.overrideRequire();
-
+            } catch(_err){
+                logger.warn('hotfix dir/file is not exist!');
+                return;
             }
-        })
+
+        }
         self.reload();
     }
 
