@@ -13,6 +13,7 @@ import { stringify } from 'querystring';
 let logger = getLogger('pinus', path.basename(__filename));
 const BASEDIR = path.dirname(process.argv[1]);
 const HOTFIXDIR = path.join(process.cwd(), Constants.FILEPATH.HOTFIX_DIR);
+
 /**
  *  判断模块是否在hotfix模块中
  */
@@ -32,13 +33,12 @@ function isPathInBaseDir(ModulePath: string) :boolean{
  *  清理被引用的模块缓存, 如果有替代的hotfix模块也同时进行清理
  */
 export function clearRequireCache(mpath: string) {
-    console.log('clearRequireCache',mpath);
     const moduleObj = require.cache[mpath];
     let replacePath: string;
+    let replaceTsPath: string;
     let relatviePath: string;
     if (moduleObj) {
         if (moduleObj.parent) {
-            //    console.log('has parent ',moduleObj.parent);
             moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
         }
         delete require.cache[mpath];
@@ -47,29 +47,40 @@ export function clearRequireCache(mpath: string) {
     if(isPathInHotfixDir(mpath)){
         relatviePath = path.relative(HOTFIXDIR, mpath);
         replacePath = path.resolve(path.join(BASEDIR, relatviePath));
+        replaceTsPath = replacePath.replace(/\.ts$/, '.js')
     }
-    else{
+    else if(isPathInBaseDir(mpath)){
         relatviePath = path.relative(BASEDIR, mpath);
         replacePath = path.resolve(path.join(HOTFIXDIR, relatviePath));
+        replaceTsPath = replacePath.replace(/\.js$/, '.ts')
+    }
+    else{
+        return;
     }
     const replaceModuleObj = require.cache[replacePath];
+    const replaceTsModuleObj = require.cache[replaceTsPath];
     if (replaceModuleObj) {
         if (replaceModuleObj.parent) {
-            //    console.log('has parent ',moduleObj.parent);
             replaceModuleObj.parent.children.splice(replaceModuleObj.parent.children.indexOf(replaceModuleObj), 1);
         }
         delete require.cache[replacePath];
 
     }
+    else if(replaceTsModuleObj){
+        if (replaceTsModuleObj.parent) {
+            replaceTsModuleObj.parent.children.splice(replaceTsModuleObj.parent.children.indexOf(replaceTsModuleObj), 1);
+        }
+        delete require.cache[replaceTsPath];
+    }
 }
 
-export function clearRequireCaches(dir: string){
+export async function clearRequireCaches(dir: string){
     const files = fs.readdirSync(dir); // 读取文件夹中的文件和文件夹
 
-    files.forEach((file) => {
+    files.forEach(async (file) => {
       const filePath = path.join(dir, file); // 构建文件或文件夹的完整路径
-  
-      if (fs.statSync(filePath).isDirectory()) {
+      let stat = await fs.promises.stat(filePath);
+      if (stat.isDirectory()) {
         // 如果是文件夹，则递归调用自身遍历子文件夹
         clearRequireCaches(filePath);
       } else {
@@ -107,25 +118,25 @@ export function overrideRequire() {
         else if(isPathInBaseDir(modulePath)){
             baseFilePath = modulePath;
             hotfixFilePath = path.resolve(path.join(HOTFIXDIR, path.relative(BASEDIR, modulePath)));
-            // 兼容一下 hotfix 中的 .ts 文件吧
-            if(!(fs.existsSync(hotfixFilePath) && fs.statSync(hotfixFilePath).isFile())){
-                hotfixFilePath.replace(/\.js$/, '.ts');
-            }
         }
+        else{
+            // 内置库或者第三方库
+            return originalLoad.apply(Module, [request, parent, ...rest]);
+        }
+
         // 先尝试加载hotfixFilePath，不成功，再加载BaseFilePath
         try{
-            return originalLoad.apply(Module, [hotfixFilePath, parent, ...rest]);
-        }
-        catch(err){
             try{
-                
-                return originalLoad.apply(Module, [baseFilePath, parent, ...rest]);
+                return originalLoad.apply(Module, [hotfixFilePath, parent, ...rest]);
             }
-            catch(err){
-                // 内置库或者第三方库
-                return originalLoad.apply(Module, [modulePath, parent, ...rest]);
+            catch(err1){
+                // 需要兼容下hotfix 目录支持 ts文件的情况
+                hotfixFilePath = hotfixFilePath.replace(/\.js$/, '.ts');
+                return originalLoad.apply(Module, [hotfixFilePath, parent, ...rest]);
             }
-            
+        }
+        catch(err2){
+            return originalLoad.apply(Module, [baseFilePath, parent, ...rest]);            
         }
     }
 };

@@ -105,7 +105,7 @@ export enum SIGNAL  {
 
 export enum TIME  {
     TIME_WAIT_STOP = 3 * 1000,
-    TIME_WAIT_HOTFIX = 4 * 1000,
+    TIME_WAIT_HOTFIX = 1 * 1000,
     TIME_WAIT_KILL = 5 * 1000,
     TIME_WAIT_RESTART = 5 * 1000,
     TIME_WAIT_COUNTDOWN = 10 * 1000,

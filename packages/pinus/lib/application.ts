@@ -636,8 +636,9 @@ export class Application {
      *
      * @param  {string} filePath 热更新路径
      */
-    hotfix(relativePath: string){
-        // override require function only first
+    async hotfix(relativePath: string){
+        logger.info('start to hofix: ' + relativePath);
+        // override require function once
         if(!this.get(Constants.RESERVED.OVERRIDE_REQUIRE)){
             utils.overrideRequire();
             this.set(Constants.RESERVED.OVERRIDE_REQUIRE, true);
@@ -646,18 +647,14 @@ export class Application {
         let hotfixPath: string = path.join(self.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath);
         let originalFilePath = path.join(self.getPkgBase(), relativePath);
         try{
-            const stat = fs.statSync(hotfixPath);
+            const stat = await fs.promises.stat(hotfixPath);
             if(stat.isDirectory()){
                 // 递归文件夹中重载require 文件，替换require的文件
-                console.log('stat.isDirector ???')
-                utils.clearRequireCaches(hotfixPath);
-                utils.clearRequireCaches(originalFilePath);
+                await utils.clearRequireCaches(hotfixPath);
             }
             else{
                 // 重载require 文件，替换require的文件
                 utils.clearRequireCache(hotfixPath);
-                utils.clearRequireCache(originalFilePath);
-                
             }
             
         } catch(err){
@@ -665,7 +662,7 @@ export class Application {
                 const _stat = fs.statSync(originalFilePath);
                 if(_stat.isDirectory()){
                     // 递归清除目录下所有文件的缓存
-                    utils.clearRequireCaches(originalFilePath);
+                    await utils.clearRequireCaches(originalFilePath);
                 }
                 else{
                     utils.clearRequireCache(originalFilePath);
@@ -677,6 +674,7 @@ export class Application {
 
         }
         self.reload();
+        logger.info('hotfix finish: ' + relativePath);
     }
 
     /**
