@@ -74,20 +74,19 @@ export function clearRequireCache(mpath: string) {
     }
 }
 
-export async function clearRequireCaches(dir: string){
-    const files = fs.readdirSync(dir); // 读取文件夹中的文件和文件夹
+export async function clearRequireCaches(dir: string) {
+    const files = await fs.promises.readdir(dir);
 
-    files.forEach(async (file) => {
-      const filePath = path.join(dir, file); // 构建文件或文件夹的完整路径
-      let stat = await fs.promises.stat(filePath);
-      if (stat.isDirectory()) {
-        // 如果是文件夹，则递归调用自身遍历子文件夹
-        clearRequireCaches(filePath);
-      } else {
-        // 执行你的操作
-        clearRequireCache(filePath);
-      }
-    });
+    for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = await fs.promises.stat(filePath);
+
+        if (stat.isDirectory()) {
+            await clearRequireCaches(filePath);
+        } else {
+            await clearRequireCache(filePath);
+        }
+    }
 }
 
 /**
