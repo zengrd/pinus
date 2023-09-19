@@ -115,7 +115,6 @@ setInterval(function() {
 		contentUpdate(totalConnCount, loginedCount);
 
 		var store = Ext.getCmp('userGridId').getStore();
-		console.log(list);
 		store.loadData(list);
 	});
 }, STATUS_INTERVAL);

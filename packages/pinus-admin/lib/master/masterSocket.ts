@@ -124,6 +124,7 @@ export class MasterSocket {
     }
 
     onClient(msg: any) {
+        console.log('masterSocket, onClient',msg)
         let socket = this.socket;
         if (!this.registered) {
             // not register yet, ignore any message

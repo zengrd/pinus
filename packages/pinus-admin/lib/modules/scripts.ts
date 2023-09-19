@@ -104,16 +104,15 @@ let list = function(scriptModule: ScriptsModule, agent: MasterAgent, msg: any, c
 let get = function(scriptModule: ScriptsModule, agent: MasterAgent, msg: any, cb: MasterCallback) {
     let filename = msg.filename;
     if (!filename) {
-        cb('empty filename');
+        cb('empty filename', '');
         return;
     }
 
     fs.readFile(path.join(scriptModule.root, filename), 'utf-8', function(err, data) {
         if (err) {
             logger.error('fail to read script file:' + filename + ', ' + err.stack);
-            cb('fail to read script with name:' + filename);
+            cb('fail to read script with name:' + filename, '');
         }
-
         cb(null, data);
     });
 };

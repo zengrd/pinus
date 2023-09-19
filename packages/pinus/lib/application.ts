@@ -644,7 +644,7 @@ export class Application {
             this.set(Constants.RESERVED.OVERRIDE_REQUIRE, true);
         }
         let self = this;
-        let hotfixPath: string = path.join(self.getBase(), Constants.FILEPATH.HOTFIX_DIR, relativePath);
+        let hotfixPath: string = path.join(self.getBase(), Constants.DIR.HOTFIX, relativePath);
         let originalFilePath = path.join(self.getPkgBase(), relativePath);
         try{
             const stat = await fs.promises.stat(hotfixPath);

@@ -12,7 +12,7 @@ import { stringify } from 'querystring';
 
 let logger = getLogger('pinus', path.basename(__filename));
 const BASEDIR = path.dirname(process.argv[1]);
-const HOTFIXDIR = path.join(process.cwd(), Constants.FILEPATH.HOTFIX_DIR);
+const HOTFIXDIR = path.join(process.cwd(), Constants.DIR.HOTFIX);
 
 /**
  *  判断模块是否在hotfix模块中

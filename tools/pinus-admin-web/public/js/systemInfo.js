@@ -346,7 +346,6 @@ var refresh = function() {
 		var store = Ext.getCmp('gridPanelId').getStore();
 		var cache = cacheNodeInfo[_serverId] || [];
 		var __data = [];
-		console.log(cache);
 		var _id = map[_yaxisId];
 		var yAxis = _chart.axes.get(0);
 		var flag = 0;
@@ -366,7 +365,6 @@ var refresh = function() {
 			yAxis.maximum = _ymax;
 			_chart.redraw();
 		}
-		console.log('refresh %j', __data);
 		store1.loadData(__data);
 		store.loadData(data);
 	});
@@ -384,7 +382,6 @@ var contentUpdate = function(system, cpu, start_time) {
 function reloadHandler() {
 	if (_intervalId != Ext.getCmp('intervalComId').getValue()) {
 		_intervalId = Ext.getCmp('intervalComId').getValue();
-		console.log(_intervalId);
 		clearInterval(seed);
 		run(_intervalId);
 	}
@@ -413,7 +410,6 @@ function reloadHandler() {
 
 	yAxis.maximum = _ymax;
 
-	console.log(yAxis.maximum);
 	timeAxis.step = [Ext.Date.MINUTE, _intervalId];
 	timeAxis.toDate = new Date(timeAxis.fromDate.getTime() + _intervalId * 10 * 60 * 1000);
 	_chart.redraw();

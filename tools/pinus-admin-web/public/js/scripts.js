@@ -197,7 +197,6 @@ var run = function() {
 		alert('serverId is required!');
 		return;
 	}
-
 	window.parent.client.request('scripts', {
 		command: 'run',
 		serverId: serverId,

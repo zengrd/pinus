@@ -27,17 +27,17 @@ export enum FILEPATH  {
     LIFECYCLE = '/lifecycle.js',
     SERVER_DIR = '/app/servers/',
     CONFIG_DIR = '../config',
-    HOTFIX_DIR = '../hotfix'
 }
 
 export enum DIR  {
-    HANDLER = 'handler',
-    REMOTE = 'remote',
-    CRON = 'cron',
-    LOG = 'logs',
-    SCRIPT = 'scripts',
+    REMOTE = '../remote',
+    CRON = '../cron',
+    LOG = '../logs',
+    SCRIPT = '../scripts', //外置脚本目录
+    HOTFIX = '../hotfix',  // 外置热更目录
     EVENT = 'events',
-    COMPONENT = 'components'
+    COMPONENT = 'components',
+    HANDLER = 'handler'
 }
 
 export enum RESERVED  {

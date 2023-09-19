@@ -45,12 +45,7 @@ function WebServer()
                 {
                     const moduleId = msg.moduleId;
                     const body = msg.body;
-                    var command = body.command;
-                    if (command)
-                    {
-                        command = {command:command};
-                    }
-                    client.request(moduleId, command, (err,data) =>
+                    client.request(moduleId, body, (err,data) =>
                     {
                         if (data)
                         {
@@ -66,7 +61,13 @@ function WebServer()
                         }
                         else
                         {
-                            console.info(msg);
+                            if(err){
+                                // 有报错，就把错误打印出来
+                                console.error(err.toString());
+                            }
+                            else{
+                                console.info(msg);
+                            }
                         }
                     })
                 })(msg, topic, socket);
