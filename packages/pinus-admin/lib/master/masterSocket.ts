@@ -124,7 +124,6 @@ export class MasterSocket {
     }
 
     onClient(msg: any) {
-        console.log('masterSocket, onClient',msg)
         let socket = this.socket;
         if (!this.registered) {
             // not register yet, ignore any message
@@ -139,7 +138,6 @@ export class MasterSocket {
         }
 
         msg = protocol.parse(msg);
-
         let msgCommand = msg.command;
         let msgModuleId = msg.moduleId;
         let msgBody = msg.body;

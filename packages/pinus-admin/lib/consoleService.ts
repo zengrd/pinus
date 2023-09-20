@@ -26,6 +26,7 @@ export interface IModule {
     type ?: ModuleType;
     interval ?: number;
     delay ?: number;
+    level ?: number;
 
     start?: (cb: (err?: Error) => void) => void;
 
@@ -275,7 +276,7 @@ export class ConsoleService extends EventEmitter {
             msg: msg
         };
 
-        let aclMsg = aclControl(self.agent as MasterAgent, 'execute', method, moduleId, msg);
+        let aclMsg = aclControl(self.agent as MasterAgent, method, moduleId, msg, module.level);
         if (aclMsg !== 0 && aclMsg !== 1) {
             log['error'] = aclMsg;
             self.emit('admin-log', log, aclMsg);
@@ -303,8 +304,9 @@ export class ConsoleService extends EventEmitter {
             moduleId: moduleId,
             msg: msg
         };
-
-        let aclMsg = aclControl(self.agent as MasterAgent, 'command', null, moduleId, msg);
+        // 让最高等级的账号才能进行访问
+        let commandLevel = 99;
+        let aclMsg = aclControl(self.agent as MasterAgent, null, moduleId, msg, commandLevel);
         if (aclMsg !== 0 && aclMsg !== 1) {
             log['error'] = aclMsg;
             self.emit('admin-log', log, aclMsg);
@@ -507,27 +509,29 @@ let disableCommand = function (consoleService: ConsoleService, moduleId: string,
     }
 };
 
-let aclControl = function (agent: MasterAgent, action: string, method: string, moduleId: string, msg: any) {
-    if (action === 'execute') {
-        if (method !== 'clientHandler' || moduleId !== '__console__') {
-            return 0;
-        }
-
-        let signal = msg.signal;
-        if (!signal || !(signal === 'stop' || signal === 'add' || signal === 'kill')) {
-            return 0;
-        }
+/**
+ * 权限控制函数
+ * 1、忽略master和monitor之间的权限控制，因为master和monitor都是内部通讯
+ * 2、主要把关master和client之间的通讯，如果master根据进行账号level和module的level分配权限
+ * 3、账号权限大于等于模块权限才能访问该模块                     
+ */
+let aclControl = function (agent: MasterAgent, method: string, moduleId: string, msg: any, moduleLevel?:number) {
+    // 忽略master和monitor之间的权限控制
+    if (method !== 'clientHandler') {
+        return 0;
     }
 
+    // 账号权限大于等于模块权限才能访问该模块 
     let clientId = msg.clientId;
     if (!clientId) {
         return 'Unknow clientId';
     }
-
     let _client = agent.getClientById(clientId);
+    // 未设定module访问权限时，设置为1
+    let _moduleLevel = moduleLevel || 1;
     if (_client && _client.info && (_client.info as AdminUserInfo).level) {
         let level = (_client.info as AdminUserInfo).level;
-        if (level > 1) {
+        if (level < _moduleLevel) {
             return 'Command permission denied';
         }
     } else {
