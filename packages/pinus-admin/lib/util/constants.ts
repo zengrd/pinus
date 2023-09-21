@@ -33,6 +33,7 @@ export interface AdminUserInfo {
     level: number;
     username: string;
     password: string;
+    env: string;
 }
 
 export interface AdminServerInfo {

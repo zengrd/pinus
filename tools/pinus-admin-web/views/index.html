@@ -13,7 +13,7 @@
 		<script src="/js/client.js"></script>
 		<script>
 			var host = '<%= host %>';
-			var port = <%= webPort %>;
+			var port = '<%= webPort %>';
 			var username = '<%= username %>';
 			var password = '<%= password %>';
 
@@ -24,15 +24,16 @@
 			});
 			// TODO: add login logic
 			client.connect('browser-' + Date.now(), host, port, function(err){
+				console.log('connect err',err);
 				if(err) {
 					console.error('fail to connect to admin console server:');
 					console.error(err);
 					alert(err);
 				} else {
-					console.info('admin console connected.');
+					console.log('admin console connected.');
+						// 获取module列表
 				}
 			});
-			console.log(window.client);
 		</script>
 	</body>	
 </html>

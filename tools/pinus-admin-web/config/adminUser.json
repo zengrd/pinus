@@ -1,0 +1,37 @@
+[
+  {
+    "id": "管理员",
+    "username": "admin",
+    "password": "admin",
+    "level": 99
+  },
+  
+  {
+    "id": "运维",
+    "username": "monitor",
+    "password": "monitor",
+    "level": 99
+  },
+
+  {
+    "id": "测试",
+    "username": "test",
+    "password": "test",
+    "level": 99,
+    "env": "development"
+  },
+
+  {
+    "id": "运营",
+    "username": "test",
+    "password": "test",
+    "level": 2
+  },
+
+  {
+    "id": "客服",
+    "username": "test",
+    "password": "test",
+    "level": 1
+  }
+]

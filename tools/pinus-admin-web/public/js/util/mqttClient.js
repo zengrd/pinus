@@ -1467,13 +1467,13 @@ MqttClient.prototype.checkKeepAlive = function(self) {
 }
 
 MqttClient.prototype.disconnect = function() {
-    this.close();
+    this.socket.close();
 }
 
 MqttClient.prototype.close = function() {
     this.connected = false;
     this.closed = true;
-    this.socket.disconnect();
+    this.disconnect();
 }
 
 MqttClient.prototype.exit = function() {

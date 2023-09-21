@@ -1,6 +1,6 @@
 const net = require('net');
 const MqttCon = require('mqtt-connection');
-const config = require('./../config/admin');
+const config = require('./../config/adminConfig');
 const websocket = require('websocket-stream');
 const protcol = require('./protocol');
 const WebSocketServer = require('ws').Server;
@@ -45,31 +45,63 @@ function WebServer()
                 {
                     const moduleId = msg.moduleId;
                     const body = msg.body;
-                    client.request(moduleId, body, (err,data) =>
-                    {
-                        if (data)
+                    // 走command通道，不走excute
+                    if(msg.command){
+                        client.command(msg.command, moduleId, body, (err,data) =>
                         {
-                            const payload = protcol.composeResponse(msg, err, data);
-                            if (payload)
+                            if (data)
                             {
-                                socket.publish({
-                                    topic: topic,
-                                    payload: payload
-                                });
+                                const payload = protcol.composeResponse(msg, err, data);
+                                if (payload)
+                                {
+                                    // 回传回网站的客户端
+                                    socket.publish({
+                                        topic: topic,
+                                        payload: payload
+                                    });
+                                }
+    
                             }
-
-                        }
-                        else
+                            else
+                            {
+                                if(err){
+                                    // 有报错，就把错误打印出来
+                                    console.error(err.toString());
+                                }
+                                else{
+                                    console.info(msg);
+                                }
+                            }
+                        })
+                    }
+                    else{
+                        client.request(moduleId, body, (err,data) =>
                         {
-                            if(err){
-                                // 有报错，就把错误打印出来
-                                console.error(err.toString());
+                            if (data)
+                            {
+                                const payload = protcol.composeResponse(msg, err, data);
+                                if (payload)
+                                {
+                                    socket.publish({
+                                        topic: topic,
+                                        payload: payload
+                                    });
+                                }
+    
                             }
-                            else{
-                                console.info(msg);
+                            else
+                            {
+                                if(err){
+                                    // 有报错，就把错误打印出来
+                                    console.error(err.toString());
+                                }
+                                else{
+                                    console.info(msg);
+                                }
                             }
-                        }
-                    })
+                        })
+                    }
+
                 })(msg, topic, socket);
             }
         });

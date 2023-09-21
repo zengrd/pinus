@@ -6,6 +6,18 @@ Ext.onReady(function() {
 	Ext.BLANK_IMAGE_URL = '../ext-4.0.7-gpl/resources/themes/images/default/tree/s.gif';
 	// Ext.BLANK_IMAGE_URL =
 	// 'http://www.cnblogs.com/ext4/resources/images/default/s.gif';
+	
+	var list = function() {
+		client.command('list', '', '', function(err, msg) {
+			if(err) {
+				alert(err);
+				return;
+			}
+			console.log(msg);
+			//Ext.getCmp('serverComId').getStore().loadData(servers);
+		});
+	};
+	setTimeout(list, 1500);
 
 	var treeStore = Ext.create('Ext.data.TreeStore', {
 		root: {
@@ -53,11 +65,11 @@ Ext.onReady(function() {
 				id: 'rpcDebug',
 				text: 'RPC调试',
 				leaf: true
-			}/*, {
+			}, {
 				id: 'profiler',
 				text: 'Profiler',
 				leaf: true
-			}*/]
+			}]
 		}
 	});
 

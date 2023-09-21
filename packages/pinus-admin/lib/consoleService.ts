@@ -276,7 +276,7 @@ export class ConsoleService extends EventEmitter {
             msg: msg
         };
 
-        let aclMsg = aclControl(self.agent as MasterAgent, method, moduleId, msg, module.level);
+        let aclMsg = aclControl(self.agent as MasterAgent, method, moduleId, msg, module.level, this.env);
         if (aclMsg !== 0 && aclMsg !== 1) {
             log['error'] = aclMsg;
             self.emit('admin-log', log, aclMsg);
@@ -291,6 +291,7 @@ export class ConsoleService extends EventEmitter {
         module[method](this.agent, msg, cb);
     }
 
+    // 显示模块，控制打开或者关闭module
     command(command: string, moduleId: string, msg: any, cb: (err ?: Error|string , msg?: any) => void) {
         let self = this;
         let fun = this.commands[command];
@@ -299,14 +300,31 @@ export class ConsoleService extends EventEmitter {
             return;
         }
 
+        // 当传入了moduleId模块，就需要判断moduleId模块是否存在
+        let moduleLevel: number;
+        if(!!moduleId){
+            let m = this.modules[moduleId];
+            if (!m) {
+                logger.error('unknown module: %j.', moduleId);
+                cb('unknown moduleId:' + moduleId);
+                return;
+            }
+            else if (!m.module) {
+                cb('module ' + moduleId + ' dose not exist');
+                return;
+            }
+            else{
+                moduleLevel = m.module.level;
+            }
+        }
+
         let log: AdminLogInfo = {
             action: 'command',
             moduleId: moduleId,
             msg: msg
         };
-        // 让最高等级的账号才能进行访问
-        let commandLevel = 99;
-        let aclMsg = aclControl(self.agent as MasterAgent, null, moduleId, msg, commandLevel);
+        // 只能显示和控制权限以内的模块
+        let aclMsg = aclControl(self.agent as MasterAgent, null, moduleId, msg, moduleLevel, this.env);
         if (aclMsg !== 0 && aclMsg !== 1) {
             log['error'] = aclMsg;
             self.emit('admin-log', log, aclMsg);
@@ -442,10 +460,18 @@ let exportEvent = function (outer: ConsoleService, inner: MasterAgent | MonitorA
  */
 let listCommand = function (consoleService: ConsoleService, moduleId: string, msg: any, cb: Callback) {
     let modules = consoleService.modules;
-
+    // 该函数特殊，所以只显示权限以内的module在这里处理
+    let clientId = msg.clientId;
+    let _client = (consoleService.agent as MasterAgent).getClientById(clientId);
+    let level = (_client.info as AdminUserInfo).level;
     let result = [];
     for (let moduleId in modules) {
         if (/^__\w+__$/.test(moduleId)) {
+            continue;
+        }
+        // 模块权限要求太高，无权访问，跳过
+        let moduleLevel = modules[moduleId].module.level || 1
+        if(moduleLevel > level){
             continue;
         }
 
@@ -513,9 +539,10 @@ let disableCommand = function (consoleService: ConsoleService, moduleId: string,
  * 权限控制函数
  * 1、忽略master和monitor之间的权限控制，因为master和monitor都是内部通讯
  * 2、主要把关master和client之间的通讯，如果master根据进行账号level和module的level分配权限
- * 3、账号权限大于等于模块权限才能访问该模块                     
+ * 3、账号权限大于等于模块权限才能访问该模块
+ * 4、如果标注了env，却不符合要求，则拒绝权限                     
  */
-let aclControl = function (agent: MasterAgent, method: string, moduleId: string, msg: any, moduleLevel?:number) {
+let aclControl = function (agent: MasterAgent, method: string, moduleId: string, msg: any, moduleLevel?: number, env?: string) {
     // 忽略master和monitor之间的权限控制
     if (method !== 'clientHandler') {
         return 0;
@@ -527,7 +554,7 @@ let aclControl = function (agent: MasterAgent, method: string, moduleId: string,
         return 'Unknow clientId';
     }
     let _client = agent.getClientById(clientId);
-    // 未设定module访问权限时，设置为1
+    // 未设定module 访问level权限时，设置为1
     let _moduleLevel = moduleLevel || 1;
     if (_client && _client.info && (_client.info as AdminUserInfo).level) {
         let level = (_client.info as AdminUserInfo).level;
@@ -537,6 +564,11 @@ let aclControl = function (agent: MasterAgent, method: string, moduleId: string,
     } else {
         return 'Client info error';
     }
+
+    if((_client.info as AdminUserInfo).env && (_client.info as AdminUserInfo).env!== env){
+        return 'Command permission denied, required env:' + env ;
+    }
+
     return 1;
 };
 
