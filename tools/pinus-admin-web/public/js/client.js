@@ -17,14 +17,13 @@
 		connect: function(id, host, port, cb) {
 			this.id = id;
 
-                var self = this;
-                console.log('try to connect ' + host + ':' + port);
+            var self = this;
+            console.log('try to connect ' + host + ':' + port);
             this.socket = new mqttClient({
                 id: id
             });
-            // this.socket = mqtt.connect('ws://'+host+':'+port, {clientId:id}); // you add a ws:// url here
-            this.socket.connect(host, port, mqtt);
-
+            // 由于作用域问题，cb无法进入下一级函数中
+            this.socket.connect(host, port, mqtt, cb);
                 this.socket.on('connect', function () {
                     self.state = Client.ST_CONNECTED;
                     self.doSend('register', {
@@ -74,7 +73,6 @@
                     self.emit('close');
                 });
 
-
 		},
 
 		request: function(moduleId, msg, cb) {
@@ -83,7 +81,6 @@
 			msg = msg || {};
 			msg.clientId = this.id;
 			msg.username = this.username;
-			console.trace("request:" ,moduleId, JSON.stringify(msg));
 			var req = protocol.composeRequest(id, moduleId, msg);
 			this.callbacks[id] = cb;
 			this.doSend('client', req);
@@ -104,7 +101,6 @@
 			msg = msg || {};
 			msg.clientId = this.id;
 			msg.username = this.username;
-			console.trace("command:" ,command, moduleId, JSON.stringify(msg));
 			var commandReq = protocol.composeCommand(id, command, moduleId, msg);
 			this.callbacks[id] = cb;
 			this.doSend('client', commandReq);

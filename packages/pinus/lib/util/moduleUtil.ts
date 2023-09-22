@@ -89,7 +89,7 @@ export function registerDefaultModules(isMaster: boolean, app: Application, clos
         app.registerAdmin(admin.modules.monitorLog, { path: pathUtil.getLogPath(app.getBase()) });
         app.registerAdmin(admin.modules.scripts, { app: app, path: pathUtil.getScriptPath(app.getBase()) });
         if (os.platform() !== Constants.PLATFORM.WIN) {
-            app.registerAdmin(admin.modules.profiler);
+            app.registerAdmin(admin.modules.profiler, {'isMaster': isMaster});
         }
     }
 }

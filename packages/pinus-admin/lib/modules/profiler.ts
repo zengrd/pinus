@@ -6,7 +6,7 @@ let logger = getLogger('pinus-admin', path.basename(__filename));
 
 let profiler: any = null;
 try {
-    profiler = require('v8-profiler');
+    profiler = require('v8-profiler-next');
 } catch (e) {
 }
 
@@ -94,7 +94,6 @@ export class ProfilerModule implements IModule {
         let method = command[1] as keyof ProfileProxy;
         let params = msg.params;
         let clientId = msg.clientId;
-
         if (!this.proxy[method] || typeof this.proxy[method] !== 'function') {
             return;
         }
