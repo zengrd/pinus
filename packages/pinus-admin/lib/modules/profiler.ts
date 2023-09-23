@@ -26,9 +26,12 @@ if (!profiler) {
 export class ProfilerModule implements IModule {
     static  moduleId = 'profiler';
     proxy: ProfileProxy;
+    level?: number;
     constructor(opts ?: {isMaster ?: boolean}) {
         if (opts && opts.isMaster) {
             this.proxy = new ProfileProxy();
+            // 用等级进行了模块屏蔽，用户最高等级只有99
+            this.level = 100;
         }
     }
 
@@ -67,12 +70,14 @@ export class ProfilerModule implements IModule {
                 onEnd: function () {
                     agent.notify(ProfilerModule.moduleId, { clientId: msg.clientId, type: type, body: { params: { uid: uid } } });
                     profiler.deleteAllSnapshots();
+                    console.log('monitorHandler end', ProfilerModule.moduleId)
                 }
             });
         }
     }
 
     masterHandler(agent: MasterAgent, msg: any, cb: MasterCallback) {
+        console.log('masterHandler', msg);
         if (msg.type === 'CPU') {
             this.proxy.stopCallBack(msg.body, msg.clientId, agent);
         } else {
@@ -85,7 +90,7 @@ export class ProfilerModule implements IModule {
             list(agent, msg, cb);
             return;
         }
-
+        console.log('clientHandler', msg);
         if (typeof msg === 'string') {
             msg = JSON.parse(msg);
         }
