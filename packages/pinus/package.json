@@ -20,7 +20,7 @@
     "pkg": "pkg . --out-path=pkg-dist/"
   },
   "engines": {
-    "node": ">=12.9.0"
+    "node": ">=18.16.0"
   },
   "bugs": {
     "url": "https://github.com/node-pinus/pinus/issues"

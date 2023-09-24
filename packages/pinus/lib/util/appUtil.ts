@@ -198,7 +198,7 @@ export interface ServerStartArgs extends ServerInfo {
  */
 let processArgs = function (app: Application, args: ServerStartArgs) {
     let serverType = args.serverType || Constants.RESERVED.MASTER;
-    let serverId = args.id || app.getMaster().id;
+    let serverId = args?.id || app.getMaster().id;
     let mode = args.mode || Constants.RESERVED.CLUSTER;
     let masterha = args.masterha || 'false';
     let type = args.type || Constants.RESERVED.ALL;
