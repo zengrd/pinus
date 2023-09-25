@@ -2,45 +2,63 @@ Ext.onReady(function() {
 
 	Ext.BLANK_IMAGE_URL = '../ext-4.0.7-gpl/resources/themes/images/default/tree/s.gif';
 
-	//server comboBox
-	var serverStore = Ext.create('Ext.data.Store', {
-		fields: ['name', 'serverId']
+	flagObject = {};
+	gmObject = {};
+
+	//flag comboBox
+	var flagStore = Ext.create('Ext.data.Store', {
+		fields: ['name', 'flagId']
 	});
 
-	var serverCom = Ext.create('Ext.form.ComboBox', {
-		id: 'serverComId',
-		fieldLabel: 'On Server',
+	var flagCom = Ext.create('Ext.form.ComboBox', {
+		id: 'flagComId',
+		fieldLabel: '指令类别',
 		labelWidth: 60,
-		store: serverStore,
+		store: flagStore,
 		queryMode: 'local',
-		displayField: 'serverId',
-		valueField: 'name'
-	});
-
-	//script comboBox
-	var scriptStore = Ext.create('Ext.data.Store', {
-		fields: ['name', 'script']
-	});
-
-	var scriptCom = Ext.create('Ext.form.ComboBox', {
-		id: 'scriptComId',
-		fieldLabel: 'Script List',
-		labelWidth: 80,
-		store: scriptStore,
-		queryMode: 'local',
-		displayField: 'script',
+		displayField: 'flagId',
 		valueField: 'name',
 		listeners: {
 			select: {
 				fn: function() {
-					var value = scriptCom.getValue();
-					get(value);
+					var value = flagCom.getValue();
+					var gmCommands = []
+					for(let key of flagObject[value]){
+						gmCommands.push({
+							name: key,
+							gmCommand: key
+						})
+					}
+					Ext.getCmp('gmCommandComId').getStore().loadData(gmCommands);
 				}
 			}
 		}
 	});
 
-	var runScriptPanel = Ext.create('Ext.form.FormPanel', {
+	//gmCommand comboBox
+	var gmCommandStore = Ext.create('Ext.data.Store', {
+		fields: ['name', 'gmCommand']
+	});
+
+	var gmCommandCom = Ext.create('Ext.form.ComboBox', {
+		id: 'gmCommandComId',
+		fieldLabel: '指令列表',
+		labelWidth: 80,
+		store: gmCommandStore,
+		queryMode: 'local',
+		displayField: 'gmCommand',
+		valueField: 'name',
+		listeners: {
+			select: {
+				fn: function() {
+					var value = gmCommandCom.getValue();
+					setDesc(value);
+				}
+			}
+		}
+	});
+
+	var rungmCommandPanel = Ext.create('Ext.form.FormPanel', {
 		bodyPadding: 10,
 		autoScroll: true,
 		autoShow: true,
@@ -52,15 +70,20 @@ Ext.onReady(function() {
 			anchor: '95%',
 			items: [{
 				xtype: 'label',
-				text: 'Run Script:',
+				text: '选择指令:',
 				columnWidth: .99
 			},
-			serverCom, scriptCom]
+			flagCom, gmCommandCom]
+		}, {
+			xtype: 'label',
+			height: 20,
+			id: 'gmCommandDescId',
+			anchor: '95%'
 		}, {
 			xtype: 'textareafield',
 			height: 150,
 			//region: 'center',
-			id: 'scriptAreaId',
+			id: 'gmCommandAreaId',
 			anchor: '95%'
 		}, {
 			layout: 'column',
@@ -83,13 +106,13 @@ Ext.onReady(function() {
 			}]
 		}, {
 			xtype: 'label',
-			text: 'Result:'
+			text: '执行结果:'
 			// height:20
 		}, {
 			xtype: 'textareafield',
 			id: 'tesultTextId',
-			height: 350,
-			name: 'scriptId',
+			height: 150,
+			name: 'gmCommandId',
 			anchor: '95%'
 		}]
 	});
@@ -97,7 +120,7 @@ Ext.onReady(function() {
 	list();
 	new Ext.Viewport({
 		layout: 'border',
-		items: [runScriptPanel]
+		items: [rungmCommandPanel]
 	});
 });
 
@@ -115,12 +138,12 @@ var saveForm = function() {
 		},
 		items: [{
 			xtype: 'textfield',
-			id: 'scriptNameId',
+			id: 'gmCommandNameId',
 			fieldLabel: 'name',
-			name: 'scriptName',
+			name: 'gmCommandName',
 			allowBlank: false,
 			width: 250,
-			value: Ext.getCmp('scriptComId').getValue()
+			value: Ext.getCmp('gmCommandComId').getValue()
 		}],
 		buttons: [{
 			text: 'Save',
@@ -133,7 +156,7 @@ var saveForm = function() {
 
 	var win = Ext.create('Ext.window.Window', {
 		id: 'saveWinId',
-		title: 'saveScript',
+		title: '保存指令',
 		height: 100,
 		width: 320,
 		layout: 'fit',
@@ -149,58 +172,60 @@ var cancel = function() {
 };
 
 var list = function() {
-	window.parent.client.request('scripts', {
+	window.parent.client.request('gmCommand', {
 		command: 'list'
 	}, function(err, msg) {
 		if (err) {
 			alert(err);
 			return;
 		}
-		var servers = [],
-			scripts = [],
-			i, l, item;
-		for (i = 0, l = msg.servers.length; i < l; i++) {
-			item = msg.servers[i];
-			servers.push({
-				name: item,
-				serverId: item
-			});
+		gmObject = msg.commands;
+		let flags = [];
+		let flag;
+		console.log(msg);
+		// 形成标签和指令名字的对应关系
+		for(let key in msg.commands){
+			flag = msg.commands[key].flag
+			if(flagObject.hasOwnProperty(flag)){
+				flagObject[flag].push(key);
+			}
+			else{
+				flagObject[flag] = [key,];
+			}
+		}
+		console.log(flagObject);
+		for(let flag in flagObject){
+			flags.push({
+				name: flag,
+				flagId: flag
+			})
 		}
 
-		for (i = 0, l = msg.scripts.length; i < l; i++) {
-			item = msg.scripts[i];
-			scripts.push({
-				name: item,
-				script: item
-			});
+		//初始化两个组件
+		console.log('flags',flags);
+		Ext.getCmp('flagComId').getStore().loadData(flags);
+		flag = flags[0];
+		console.log('flag', flag);
+		var gmCommands = []
+		for(let key of flagObject[flag.name]){
+			gmCommands.push({
+				name: key,
+				gmCommand: key
+			})
 		}
-
-		servers.sort(function(o1, o2) {
-			return o1.name.localeCompare(o2);
-		});
-
-		scripts.sort(function(o1, o2) {
-			return o1.name.localeCompare(o2);
-		});
-
-		Ext.getCmp('serverComId').getStore().loadData(servers);
-		Ext.getCmp('scriptComId').getStore().loadData(scripts);
+		Ext.getCmp('gmCommandComId').getStore().loadData(gmCommands);
 	});
 };
 
-//run the script
-var run = function() {
-	var scriptJs = Ext.getCmp('scriptAreaId').getValue();
-	var serverId = Ext.getCmp('serverComId').getValue();
 
-	if (!serverId) {
-		alert('serverId is required!');
-		return;
-	}
-	window.parent.client.request('scripts', {
-		command: 'run',
-		serverId: serverId,
-		script: scriptJs
+//run the gmCommand
+var run = function() {
+	var args = Ext.getCmp('gmCommandAreaId').getValue();
+	var command = Ext.getCmp('gmCommandComId').getValue();
+
+	window.parent.client.request('gmCommand', {
+		command: command,
+		args: [args,]
 	}, function(err, msg) {
 		if (err) {
 			alert(err);
@@ -210,29 +235,21 @@ var run = function() {
 	});
 };
 
-var get = function(filename) {
-	window.parent.client.request('scripts', {
-		command: 'get',
-		filename: filename
-	}, function(err, msg) {
-		if (err) {
-			alert(err);
-			return;
-		}
-		Ext.getCmp('scriptAreaId').setValue(msg);
-	});
+var setDesc = function(key) {
+	var desc = gmObject[key].desc;
+	Ext.getCmp('gmCommandDescId').setText(desc);
 };
 
 var save = function() {
-	var filename = Ext.getCmp('scriptNameId').getValue();
+	var filename = Ext.getCmp('gmCommandNameId').getValue();
 	if (!filename.match(/\.js$/)) {
 		alert('the filename is required!');
 		return;
 	}
 
-	var data = Ext.getCmp('scriptAreaId').getValue();
+	var data = Ext.getCmp('gmCommandAreaId').getValue();
 
-	window.parent.client.request('scripts', {
+	window.parent.client.request('gmCommands', {
 		command: 'save',
 		filename: filename,
 		body: data
@@ -242,6 +259,6 @@ var save = function() {
 			return;
 		}
 		alert('save success!');
-		data = Ext.getCmp('scriptAreaId').setValue('');
+		data = Ext.getCmp('gmCommandAreaId').setValue('');
 	});
 };

@@ -11,7 +11,8 @@ export * from './lib/protocol/mqtt/mqttConnectorDefine';
 export * from './lib/client/client';
 export * from './lib/monitor/monitorAgent';
 export * from './lib/master/masterAgent';
-export {DEFAULT_ADMIN_PATH} from './lib/util/constants'
+export { DEFAULT_ADMIN_PATH } from './lib/util/constants'
+export { AdminUserInfo } from './lib/util/constants'
 
 export let modules = {
     monitorLog : MonitorLogModule,

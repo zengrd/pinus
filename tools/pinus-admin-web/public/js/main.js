@@ -49,6 +49,10 @@ var allMemu = [{
 	id: 'profiler',
 	text: '性能调试',
 	leaf: true
+}, {
+	id: 'gmCommand',
+	text: 'GM指令',
+	leaf: true
 }]
 
 var centerPanel = '';
