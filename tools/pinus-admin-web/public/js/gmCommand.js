@@ -12,7 +12,7 @@ Ext.onReady(function() {
 
 	var flagCom = Ext.create('Ext.form.ComboBox', {
 		id: 'flagComId',
-		fieldLabel: '指令类别',
+		fieldLabel: '选择类别',
 		labelWidth: 60,
 		store: flagStore,
 		queryMode: 'local',
@@ -42,12 +42,13 @@ Ext.onReady(function() {
 
 	var gmCommandCom = Ext.create('Ext.form.ComboBox', {
 		id: 'gmCommandComId',
-		fieldLabel: '指令列表',
-		labelWidth: 80,
+		fieldLabel: '选择指令',
+		labelWidth: 60,
 		store: gmCommandStore,
 		queryMode: 'local',
 		displayField: 'gmCommand',
 		valueField: 'name',
+		margin: '0 0 0 20',
 		listeners: {
 			select: {
 				fn: function() {
@@ -70,18 +71,20 @@ Ext.onReady(function() {
 			anchor: '95%',
 			items: [{
 				xtype: 'label',
-				text: '选择指令:',
+
 				columnWidth: .99
 			},
 			flagCom, gmCommandCom]
 		}, {
 			xtype: 'label',
-			height: 20,
+			text: '指令参数：',
+			height: 40,
+			margin: '30 0 0 0',
 			id: 'gmCommandDescId',
 			anchor: '95%'
 		}, {
 			xtype: 'textareafield',
-			height: 150,
+			height: 250,
 			//region: 'center',
 			id: 'gmCommandAreaId',
 			anchor: '95%'
@@ -95,14 +98,7 @@ Ext.onReady(function() {
 				text: 'Run',
 				handler: run,
 				width: 150,
-				margin: '10 0 10 900'
-			}, {
-				// colspan: 2
-				xtype: 'button',
-				text: 'Save',
-				handler: saveForm,
-				width: 150,
-				margin: '10 0 10 100'
+				//margin: '10 300 10 0'
 			}]
 		}, {
 			xtype: 'label',
@@ -124,52 +120,6 @@ Ext.onReady(function() {
 	});
 });
 
-var saveForm = function() {
-	var saveForm = Ext.create('Ext.form.Panel', {
-		frame: true,
-		bodyStyle: 'padding:2px 2px 0',
-		width: 300,
-		// defaultType: 'textfield',
-		// renderTo: Ext.getBody(),
-		anchor: '100%',
-		fieldDefaults: {
-			msgTarget: 'side',
-			labelWidth: 50
-		},
-		items: [{
-			xtype: 'textfield',
-			id: 'gmCommandNameId',
-			fieldLabel: 'name',
-			name: 'gmCommandName',
-			allowBlank: false,
-			width: 250,
-			value: Ext.getCmp('gmCommandComId').getValue()
-		}],
-		buttons: [{
-			text: 'Save',
-			handler: save
-		}, {
-			text: 'Cancel',
-			handler: cancel
-		}]
-	});
-
-	var win = Ext.create('Ext.window.Window', {
-		id: 'saveWinId',
-		title: '保存指令',
-		height: 100,
-		width: 320,
-		layout: 'fit',
-		anchor: '100%',
-		items: [saveForm]
-	});
-
-	win.show();
-};
-
-var cancel = function() {
-	Ext.getCmp('saveWinId').close();
-};
 
 var list = function() {
 	window.parent.client.request('gmCommand', {
@@ -182,7 +132,6 @@ var list = function() {
 		gmObject = msg.commands;
 		let flags = [];
 		let flag;
-		console.log(msg);
 		// 形成标签和指令名字的对应关系
 		for(let key in msg.commands){
 			flag = msg.commands[key].flag
@@ -193,7 +142,6 @@ var list = function() {
 				flagObject[flag] = [key,];
 			}
 		}
-		console.log(flagObject);
 		for(let flag in flagObject){
 			flags.push({
 				name: flag,
@@ -202,10 +150,8 @@ var list = function() {
 		}
 
 		//初始化两个组件
-		console.log('flags',flags);
 		Ext.getCmp('flagComId').getStore().loadData(flags);
 		flag = flags[0];
-		console.log('flag', flag);
 		var gmCommands = []
 		for(let key of flagObject[flag.name]){
 			gmCommands.push({
@@ -222,10 +168,23 @@ var list = function() {
 var run = function() {
 	var args = Ext.getCmp('gmCommandAreaId').getValue();
 	var command = Ext.getCmp('gmCommandComId').getValue();
-
+	var argsType = gmObject[command].argsType;
+	if(argsType&& argsType.length > 1){
+		var length = argsType.length
+		const parts = args.split(',', length);
+		if(parts.length !== length){
+			alert('指令参数输入个数不正确');
+			return;
+		}
+		else{
+			args = parts
+		}
+	} else{
+		args = [args,]
+	}
 	window.parent.client.request('gmCommand', {
 		command: command,
-		args: [args,]
+		args: args
 	}, function(err, msg) {
 		if (err) {
 			alert(err);
@@ -237,28 +196,12 @@ var run = function() {
 
 var setDesc = function(key) {
 	var desc = gmObject[key].desc;
-	Ext.getCmp('gmCommandDescId').setText(desc);
-};
-
-var save = function() {
-	var filename = Ext.getCmp('gmCommandNameId').getValue();
-	if (!filename.match(/\.js$/)) {
-		alert('the filename is required!');
-		return;
+	var argsType = gmObject[key].argsType;
+	if(argsType&&argsType.length > 1){
+		desc = desc + ', 参数类型：' + argsType + ', 多个参数按英文逗号分割'
 	}
-
-	var data = Ext.getCmp('gmCommandAreaId').getValue();
-
-	window.parent.client.request('gmCommands', {
-		command: 'save',
-		filename: filename,
-		body: data
-	}, function(err, msg) {
-		if (err) {
-			alert(err);
-			return;
-		}
-		alert('save success!');
-		data = Ext.getCmp('gmCommandAreaId').setValue('');
-	});
+	else{
+		desc = desc + ', 输入参数：'
+	}
+	Ext.getCmp('gmCommandDescId').setText(desc);
 };

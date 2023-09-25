@@ -138,7 +138,7 @@ Ext.onReady(function() {
 			items: [{
 				region: 'north',
 				height: 40,
-				html: '<body><div style="position:relative;height:40px;line-height:40px;font-size:24px;color:#fff;background:#f8851f url(/ext-4.0.7-gpl/resources/themes/images/custom/icon.png) no-repeat 0 0;border-bottom:1px solid #c66a19;zoom:1;padding-left:48px;">Pinus监控中心</div></body>'
+				html: '<body><div style="position:relative;height:40px;line-height:40px;font-size:24px;color:#fff;background:#f8851f url(/ext-4.0.7-gpl/resources/themes/images/custom/icon.png) no-repeat 0 0;border-bottom:1px solid #c66a19;zoom:1;padding-left:48px;">Pinus服务监控运营平台</div></body>'
 			},
 			westpanel, centerPanel]
 		});

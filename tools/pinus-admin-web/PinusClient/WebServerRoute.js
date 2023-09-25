@@ -49,56 +49,29 @@ function WebServer()
                     if(msg.command){
                         client.command(msg.command, moduleId, body, (err,data) =>
                         {
-                            if (data)
-                            {
-                                const payload = protcol.composeResponse(msg, err, data);
-                                if (payload)
-                                {
-                                    // 回传回网站的客户端
-                                    socket.publish({
-                                        topic: topic,
-                                        payload: payload
-                                    });
-                                }
     
-                            }
-                            else
+                            const payload = protcol.composeResponse(msg, err, data);
+                            if (payload)
                             {
-                                if(err){
-                                    // 有报错，就把错误打印出来
-                                    console.error(err.toString());
-                                }
-                                else{
-                                    console.info(msg);
-                                }
+                                // 回传回网站的客户端
+                                socket.publish({
+                                    topic: topic,
+                                    payload: payload
+                                });
                             }
                         })
                     }
                     else{
                         client.request(moduleId, body, (err,data) =>
                         {
-                            if (data)
+                            const payload = protcol.composeResponse(msg, err, data);
+                            if (payload)
                             {
-                                const payload = protcol.composeResponse(msg, err, data);
-                                if (payload)
-                                {
-                                    socket.publish({
-                                        topic: topic,
-                                        payload: payload
-                                    });
-                                }
-    
-                            }
-                            else
-                            {
-                                if(err){
-                                    // 有报错，就把错误打印出来
-                                    console.error(err.toString());
-                                }
-                                else{
-                                    console.info(msg);
-                                }
-                            }
+                                socket.publish({
+                                    topic: topic,
+                                    payload: payload
+                                });
+                            }   
                         })
                     }
 
