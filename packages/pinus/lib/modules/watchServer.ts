@@ -24,11 +24,14 @@ enum HandleType {
 
 export class WatchServerModule implements IModule {
     static moduleId = 'watchServer';
+    level?: number;
 
     app: Application;
     constructor(opts ?: {app ?: Application}) {
         opts = opts || {};
         this.app = opts.app;
+        // 需要99级权限才能访问
+        this.level = 99;
     }
 
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {

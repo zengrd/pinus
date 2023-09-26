@@ -198,6 +198,18 @@ export let consts = {
         'dump': 1
     },
 
+    // 登录的账号和密码
+    ADMIN_USER: {
+        'user': 'monitor',
+        'password': 'monitor',
+    },
+
+    // 端口和ip
+    SERVER_CONFIG: {
+        'host': '127.0.0.1',
+        'port': 3005
+    },
+
     // ASCII_LOGO: [
     //     ".______     ______   .___  ___.  _______   __         ______   ",
     //     "|   _  )   (  __  )  |   \\/   | |   ____| |  |       (  __  )  ",

@@ -19,6 +19,7 @@ export class ScriptsModule implements IModule {
     app: any;
     root: string;
     commands: {[key: string]: Function};
+    level?: number;
 
     static moduleId = 'scripts';
 
@@ -31,6 +32,7 @@ export class ScriptsModule implements IModule {
             'save': save,
             'run': run
         };
+        this.level = 99;
     }
 
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {

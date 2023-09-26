@@ -26,6 +26,7 @@ let DEFAULT_INTERVAL = 5 * 60;        // in second
 export class MonitorLogModule implements IModule {
     root: string;
     interval: number;
+    level?: number;
 
     static moduleId = 'monitorLog';
 
@@ -33,6 +34,7 @@ export class MonitorLogModule implements IModule {
         opts = opts || {};
         this.root = opts.path;
         this.interval = opts.interval || DEFAULT_INTERVAL;
+        this.level = 99;
     }
 
     /**

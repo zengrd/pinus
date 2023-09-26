@@ -5,10 +5,12 @@ import { consts } from './consts';
 import * as util from './util';
 import { argv } from 'optimist';
 
-let username = argv['u'] = argv['u'] || 'monitor';
-let password = argv['p'] = argv['p'] || 'monitor';
-let host = argv['h'] = argv['h'] || 'localhost';
-let port = argv['P'] = argv['P'] || 3005;
+
+// 设置初始密码在这里
+let username = argv['u'] = argv['u'] || consts.ADMIN_USER.user;
+let password = argv['p'] = argv['p'] || consts.ADMIN_USER.password;
+let host = argv['h'] = argv['h'] || consts.SERVER_CONFIG.host;
+let port = argv['P'] = argv['P'] || consts.SERVER_CONFIG.port;
 let context = 'all';
 let client: AdminClient = null;
 

@@ -26,12 +26,13 @@ export interface ConsoleModuleOptions {
 
 export class ConsoleModule implements IModule {
     app: Application;
-
+    level?: number;
     static moduleId = '__console__';
 
     constructor(opts: ConsoleModuleOptions) {
         opts = opts || {};
         this.app = opts.app;
+        this.level = 99;
     }
 
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {
