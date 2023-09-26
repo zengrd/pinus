@@ -668,8 +668,8 @@ export class Application {
                     utils.clearRequireCache(originalFilePath);
                 }
             } catch(_err){
-                logger.warn('under hotfix and basedir dir/file is not exist!');
-                return;
+                logger.warn('under hotfix or basedir dir/file is not exist!');
+                throw new Error('hotfix file/path is not exist!');
             }
 
         }
