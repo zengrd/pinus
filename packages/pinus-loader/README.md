@@ -4,7 +4,7 @@
 
 Load codes for pinus based on the convention over configuration rules.
 
-pinus-rpc could load modules in batch but not load the sub-directory recursively.
+pinus-loader could load modules in batch but not load the sub-directory recursively.
 
 + Tags: node.js
 
