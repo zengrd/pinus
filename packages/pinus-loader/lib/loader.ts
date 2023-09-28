@@ -82,12 +82,14 @@ export function loadPath(path: string, context: any, reload: boolean, createInst
             continue;
         }
         // 兼容旧的写法
+        // 但是基本只有旧写法才生效，新写法根本没地方用上
         if (typeof m.default === 'function') {
             let instance = m.default(context);
             let name = instance.name || getFileName(fn, '.js'.length);
             res[name] = instance;
         }
 
+        // Todo:新写法，怎么样都无法生效，有装饰器相关语法报错，找时间需要处理掉
         for (let key in m) {
             let cls = m[key];
             if (isDefined(cls, pathType)) {
@@ -99,7 +101,6 @@ export function loadPath(path: string, context: any, reload: boolean, createInst
             }
         }
     }
-
     return res;
 }
 
@@ -145,7 +146,6 @@ const clearRequireCache = function (path: string) {
         return;
     }
     if (moduleObj.parent) {
-        //    console.log('has parent ',moduleObj.parent);
         moduleObj.parent.children.splice(moduleObj.parent.children.indexOf(moduleObj), 1);
     }
     delete require.cache[path];

@@ -30,14 +30,14 @@ export enum FILEPATH  {
 }
 
 export enum DIR  {
-    REMOTE = '../remote',
-    CRON = '../cron',
-    LOG = '../logs',
-    SCRIPT = '../scripts', //外置脚本目录
-    HOTFIX = '../hotfix',  // 外置热更目录
+    REMOTE = 'remote', // app下或者plguin下rpc 目录
+    CRON = 'cron',   // app或者plugin下定时器脚本目录
     EVENT = 'events',
     COMPONENT = 'components',
-    HANDLER = 'handler'
+    HANDLER = 'handler',
+    LOG = '../logs', // pkg 打包后外置logs目录
+    SCRIPT = '../scripts', // pkg打包后外置脚本目录
+    HOTFIX = '../hotfix'   // pkg打包后外置热更目录
 }
 
 export enum RESERVED  {
