@@ -136,9 +136,10 @@ export function terminal(signal: string, opts: any) {
 
 export function hotfix(signal: string, opts: any) {
     let id = 'pinus_hotfix_' + Date.now();
+    let moduleId = 'hotfix'
     connectToMaster(id, opts, function (client) {
-        client.request(co.moduleId, {
-            signal: signal, serverTypes: opts.serverTypes, filePath: opts.filePath
+        client.request(moduleId, {
+            serverTypes: opts.serverTypes, filePath: opts.filePath
         }, function (err, msg) {
                 if (err) {
                     console.error(err);

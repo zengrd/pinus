@@ -27,15 +27,14 @@ import { BackendSessionService } from './common/service/backendSessionService';
 import { ChannelService, ChannelServiceOptions } from './common/service/channelService';
 import { SessionComponent } from './components/session';
 import { ServerComponent } from './components/server';
-import { RemoteComponent, RemoteComponentOptions, manualReloadRemoters } from './components/remote';
-import { ProxyComponent, ProxyComponentOptions, RouteFunction, RouteMaps, manualReloadProxies } from './components/proxy';
+import { RemoteComponent, RemoteComponentOptions, } from './components/remote';
+import { ProxyComponent, ProxyComponentOptions, RouteFunction, RouteMaps } from './components/proxy';
 import { ProtobufComponent, ProtobufComponentOptions } from './components/protobuf';
 import { MonitorComponent } from './components/monitor';
 import { MasterComponent } from './components/master';
 import { ConnectorComponent, ConnectorComponentOptions } from './components/connector';
 import { ConnectionComponent } from './components/connection';
 import { SessionService } from './common/service/sessionService';
-import { manualReloadHandlers } from './common/service/handlerService';
 import { ObjectType } from './interfaces/define';
 import { IModule, IModuleFactory } from 'pinus-admin';
 import { ChannelComponent } from './components/channel';
@@ -184,8 +183,6 @@ export class Application {
         this.base = base;
         let pkg_base = opts.base || path.dirname(process.argv[1]);
         this.set(Constants.RESERVED.PKG_BASE, pkg_base);
-        // 初始设定未重载require
-        this.set(Constants.RESERVED.OVERRIDE_REQUIRE, false);
         appUtil.defaultConfiguration(this);
 
         this.state = STATE_INITED;
@@ -623,60 +620,6 @@ export class Application {
         }, cancelShutDownTimer);
     }
 
-    reload():void {
-        manualReloadHandlers(this);
-        manualReloadRemoters(this);
-        manualReloadProxies(this);
-        manualReloadCrons(this);
-    }
-
-
-    /**
-     * hotfix components.
-     *
-     * @param  {string} filePath 热更新路径
-     */
-    async hotfix(relativePath: string){
-        logger.info('start to hofix: ' + relativePath);
-        // override require function once
-        if(!this.get(Constants.RESERVED.OVERRIDE_REQUIRE)){
-            utils.overrideRequire();
-            this.set(Constants.RESERVED.OVERRIDE_REQUIRE, true);
-        }
-        let self = this;
-        let hotfixPath: string = path.join(self.getBase(), Constants.DIR.HOTFIX, relativePath);
-        let originalFilePath = path.join(self.getPkgBase(), relativePath);
-        try{
-            const stat = await fs.promises.stat(hotfixPath);
-            if(stat.isDirectory()){
-                // 递归文件夹中重载require 文件，替换require的文件
-                await utils.clearRequireCaches(hotfixPath);
-            }
-            else{
-                // 重载require 文件，替换require的文件
-                utils.clearRequireCache(hotfixPath);
-            }
-            
-        } catch(err){
-            try{
-                const _stat = fs.statSync(originalFilePath);
-                if(_stat.isDirectory()){
-                    // 递归清除目录下所有文件的缓存
-                    await utils.clearRequireCaches(originalFilePath);
-                }
-                else{
-                    utils.clearRequireCache(originalFilePath);
-                }
-            } catch(_err){
-                logger.warn('under hotfix or basedir dir/file is not exist!');
-                throw new Error('hotfix file/path is not exist!');
-            }
-
-        }
-        self.reload();
-        logger.info('hotfix finish: ' + relativePath);
-    }
-
     /**
      * Assign `setting` to `val`, or return `setting`'s value.
      *
@@ -716,7 +659,6 @@ export class Application {
     set(setting: Constants.KEYWORDS.BEFORE_STOP_HOOK, val: BeforeStopHookFunction, attach?: boolean): Application;
     set(setting: Constants.RESERVED.BASE, val: string, attach?: boolean): Application;
     set(setting: Constants.RESERVED.PKG_BASE, val: string, attach?: boolean): Application;
-    set(setting: Constants.RESERVED.OVERRIDE_REQUIRE, val: boolean, attach?: boolean): Application;
     set(setting: Constants.RESERVED.ENV, val: string, attach?: boolean): Application;
     set(setting: Constants.RESERVED.GLOBAL_ERROR_HANDLER, val: ResponseErrorHandler, attach?: boolean): Application;
     set(setting: Constants.RESERVED.ERROR_HANDLER, val: ResponseErrorHandler, attach?: boolean): Application;
@@ -753,7 +695,6 @@ export class Application {
     get(setting: Constants.KEYWORDS.BEFORE_STOP_HOOK): BeforeStopHookFunction;
     get(setting: Constants.RESERVED.BASE): string;
     get(setting: Constants.RESERVED.PKG_BASE): string;
-    get(setting: Constants.RESERVED.OVERRIDE_REQUIRE): boolean;
     get(setting: Constants.RESERVED.ENV): string;
     get(setting: Constants.RESERVED.GLOBAL_ERROR_HANDLER): ResponseErrorHandler;
     get(setting: Constants.RESERVED.ERROR_HANDLER): ResponseErrorHandler;

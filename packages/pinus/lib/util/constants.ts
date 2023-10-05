@@ -37,7 +37,6 @@ export enum DIR  {
     HANDLER = 'handler',
     LOG = '../logs', // pkg 打包后外置logs目录
     SCRIPT = '../scripts', // pkg打包后外置脚本目录
-    HOTFIX = '../hotfix'   // pkg打包后外置热更目录
 }
 
 export enum RESERVED  {
@@ -75,8 +74,7 @@ export enum RESERVED  {
     CLIENT = 'client',
     STARTID = 'startId',
     STOP_SERVERS = 'stop_servers',
-    SSH_CONFIG_PARAMS = 'ssh_config_params',
-    OVERRIDE_REQUIRE = 'override_require'
+    SSH_CONFIG_PARAMS = 'ssh_config_params'
 }
 
 export enum COMMAND  {
@@ -105,7 +103,6 @@ export enum SIGNAL  {
 
 export enum TIME  {
     TIME_WAIT_STOP = 3 * 1000,
-    TIME_WAIT_HOTFIX = 1 * 1000,
     TIME_WAIT_KILL = 5 * 1000,
     TIME_WAIT_RESTART = 5 * 1000,
     TIME_WAIT_COUNTDOWN = 10 * 1000,

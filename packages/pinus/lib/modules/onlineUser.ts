@@ -41,7 +41,7 @@ export class OnlineUserModule implements IModule {
             logger.error('not support connection: %j', agent.id);
             return;
         }
-        // getStatisticsInfo 在线用户信息太多的情况，进行裁剪
+        // Todo：getStatisticsInfo 在线用户信息太多的情况，进行裁剪
         agent.notify(OnlineUserModule.moduleId, connectionService.getStatisticsInfo());
     }
 
