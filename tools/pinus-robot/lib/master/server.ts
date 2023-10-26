@@ -48,7 +48,8 @@ export class Server {
 
     listen(port: number | string) {
         const server = require('http').createServer();
-        this.io = io(server);
+        this.io = io(server,{
+          });
         server.listen(port);
         this.register();
     }

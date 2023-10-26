@@ -1,5 +1,5 @@
-import cluster from 'cluster';
 import * as http from 'http';
+const cluster = require('node:cluster');
 let envConfig = require('./app/config/env.json');
 let config = require('./app/config/' + envConfig.env + '/config');
 let path = __filename.substring(0, __filename.lastIndexOf('/'));
@@ -19,8 +19,14 @@ function stop() {
     }
 }
 
-function startHttp() {
+
+/*
+* 这个代码是操作压测客户端多进程压测，比如开关结束等都是多进程
+*
+*/
+function startHttp(): void {
     http.createServer(function (req, res) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
         if (req.method === 'GET') {
             let url = require('url').parse(req.url, true);
             if (url.pathname === '/') {
@@ -56,7 +62,7 @@ process.on('uncaughtException', function (err) {
     require('fs').writeFileSync('/tmp/log', err.stack, 'utf8');
 });
 
-if (cluster.isMaster) {
+if (cluster.isPrimary) {
     startHttp();
 } else {
     robot.runAgent(path + envConfig.script);

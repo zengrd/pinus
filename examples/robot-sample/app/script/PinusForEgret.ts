@@ -127,11 +127,11 @@ export class WSClient {
         let onclose = (event) => {
             this.onClose(event);
         };
-        let url = 'ws://' + host;
+        let url = 'wss://' + host;
         if (port) {
             url += ':' + port;
         }
-        let socket = new WebSocket(url);
+        let socket = new WebSocket(url, {rejectUnauthorized:false});
         socket.binaryType = 'arraybuffer';
         socket.onopen = onopen;
         socket.onmessage = onmessage;

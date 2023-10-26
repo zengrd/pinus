@@ -14,7 +14,7 @@ export class Client {
     public connectGate(): void {
 
         let host = '127.0.0.1';
-        let port = '3014';
+        let port = '3010';
         this.pinusClient.on(pinus.WSClient.EVENT_IO_ERROR, function(event) {
             // 错误处理
             console.error('error', event);
@@ -77,13 +77,24 @@ export class Client {
 
         // this.actor.emit("incr" , "loginQueryReq");
         this.actor.emit('start' , 'loginQuery' , this.actor.id);
-        this.pinusClient.request('connector.entryHandler.enter', result , (ret: any) => {
+        this.pinusClient.request('connector.entryHandler.login', result , (ret: any) => {
             // 消息回调
             this.actor.emit('end' , 'loginQuery' , this.actor.id);
-            console.log('connector返回', JSON.stringify(result));
+            console.log('connector返回', JSON.stringify(ret));
+            this.gameEntry();
+        });
+    }
+
+    gameEntry(){
+        this.actor.emit('start' , 'gameEntry' , this.actor.id);
+        this.pinusClient.request('game.gameHandler.entry', '', (ret: any) => {
+            // 消息回调
+            this.actor.emit('end' , 'gameEntry' , this.actor.id);
+            console.log('gameEntry返回', JSON.stringify(ret));
 
         });
     }
+
 }
 
 export default function(actor: Actor) {

@@ -1,7 +1,7 @@
 let __ = require('underscore');
-import {io, Socket} from 'socket.io-client';
 import { logging, Logger } from '../common/logging';
 import { Actor } from './actor';
+const io = require('socket.io-client');
 let monitor = require('../monitor/monitor');
 let fs = require('fs');
 let util = require('../common/util');
@@ -31,7 +31,7 @@ export class Agent {
     reconnecting: boolean;
     actors: { [key: string]: any };
     count: number;
-    socket: Socket;
+    socket: any;
     nodeId: string;
     constructor(conf: AgentCfg) {
         this.log = logging;
@@ -49,7 +49,11 @@ export class Agent {
         let agent = this;
         let uri = 'http://' + agent.conf.master.host + ':' + agent.conf.master.port;
         console.log('connecting:' , uri);
-        agent.socket = io(uri, { forceNew: true, multiplex: false });
+        agent.socket = io(uri, { 
+            forceNew: true, 
+            multiplex: false,
+
+         });
         agent.socket.on('error', function (reason: Error) {
             console.error('err:' , reason);
             agent.reconnect();
