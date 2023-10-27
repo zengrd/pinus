@@ -33,12 +33,12 @@ export class Client {
         });
 
         // this.actor.emit("incr" , "gateConnReq");
-        this.actor.emit('start' , 'gateConn' , this.actor.id);
+        this.actor.emit('start' , 'initGateConn' , this.actor.id);
         this.pinusClient.init({
             host: host,
             port: port
         }, () => {
-            this.actor.emit('end' , 'gateConn' , this.actor.id);
+            this.actor.emit('end' , 'initGateConn' , this.actor.id);
             // 连接成功执行函数
             console.log('gate连接成功');
 
@@ -48,11 +48,11 @@ export class Client {
     }
     gateQuery() {
         // this.actor.emit("incr" , "gateQueryReq");
-        this.actor.emit('start' , 'gateQuery' , this.actor.id);
+        this.actor.emit('start' , 'queryEntry' , this.actor.id);
         this.pinusClient.request('gate.gateHandler.queryEntry', {uid: this.openid} , (result: {code: number , host: string , port: number}) => {
             //  消息回调
             // console.log("gate返回",JSON.stringify(result));
-            this.actor.emit('end' , 'gateQuery' , this.actor.id);
+            this.actor.emit('end' , 'queryEntry' , this.actor.id);
             this.pinusClient.disconnect();
             this.connectToConnector(result);
         });
@@ -60,12 +60,12 @@ export class Client {
 
     connectToConnector(result: {host: string , port: number}) {
         // this.actor.emit("incr" , "loginConnReq");
-        this.actor.emit('start' , 'loginConn' , this.actor.id);
+        this.actor.emit('start' , 'initConn' , this.actor.id);
         this.pinusClient.init({
             host: result.host,
             port: result.port
         }, () => {
-            this.actor.emit('end' , 'loginConn' , this.actor.id);
+            this.actor.emit('end' , 'initConn' , this.actor.id);
             // 连接成功执行函数
             console.log('connector连接成功');
 
@@ -75,7 +75,7 @@ export class Client {
 
     loginQuery(result: {rid: string, username: string}) {
 
-        // this.actor.emit("incr" , "loginQueryReq");
+        // this.actor.emit("incr" , "login");
         this.actor.emit('start' , 'loginQuery' , this.actor.id);
         this.pinusClient.request('connector.entryHandler.login', result , (ret: any) => {
             // 消息回调

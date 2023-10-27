@@ -26,7 +26,6 @@ function stop() {
 */
 function startHttp(): void {
     http.createServer(function (req, res) {
-        res.setHeader('Access-Control-Allow-Origin', '*');
         if (req.method === 'GET') {
             let url = require('url').parse(req.url, true);
             if (url.pathname === '/') {

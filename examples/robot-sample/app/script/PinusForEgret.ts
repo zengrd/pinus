@@ -197,7 +197,8 @@ export class WSClient {
     }
 
     private onClose(e: any): void {
-        console.error('[Pinus] connect close:', e);
+        // 关闭链接，不再报错
+        // console.error('[Pinus] connect close:', e);
         // this.emit(Pinus.EVENT_CLOSE,e);
     }
 
