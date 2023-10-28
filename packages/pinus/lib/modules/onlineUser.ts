@@ -42,7 +42,11 @@ export class OnlineUserModule implements IModule {
             return;
         }
         // Todo：getStatisticsInfo 在线用户信息太多的情况，进行裁剪
-        agent.notify(OnlineUserModule.moduleId, connectionService.getStatisticsInfo());
+        let allStatisticsInfo = connectionService.getStatisticsInfo();
+        if(allStatisticsInfo.loginedCount > 0){
+            allStatisticsInfo.loginedList = allStatisticsInfo.loginedList.slice(0, 1);
+        }
+        agent.notify(OnlineUserModule.moduleId, allStatisticsInfo);
     }
 
     masterHandler(agent: MasterAgent, msg: any) {
