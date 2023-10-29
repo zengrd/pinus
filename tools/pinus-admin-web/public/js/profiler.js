@@ -101,6 +101,7 @@ function startProf() {
 		alert('profiler type is required!');
 		return;
 	}
+	/*
 	socket.emit('webMessage', {
 		method: 'profiler',
 		type: scriptJs,
@@ -108,6 +109,18 @@ function startProf() {
 		serverId: serverId
 	});
 	socket.on('profiler', function(msg) {
+		Ext.getCmp('tesultTextId').setValue(msg);
+	});
+	*/
+	window.parent.client.request('profiler', {
+		action: 'start',
+		serverId: serverId,
+		type: scriptJs,
+	}, function(err, msg) {
+		if (err) {
+			alert(err);
+			return;
+		}
 		Ext.getCmp('tesultTextId').setValue(msg);
 	});
 }
@@ -123,10 +136,24 @@ function stopProf() {
 		alert('profiler type is required!');
 		return;
 	}
+	/*
 	socket.emit('webMessage', {
 		method: 'profiler',
 		type: scriptJs,
 		action: 'stop',
 		serverId: serverId
+	});
+	*/
+	
+	window.parent.client.request('profiler', {
+		action: 'stop',
+		serverId: serverId,
+		type: scriptJs,
+	}, function(err, msg) {
+		if (err) {
+			alert(err);
+			return;
+		}
+		Ext.getCmp('tesultTextId').setValue(msg);
 	});
 }

@@ -31,7 +31,7 @@ export class ProfilerModule implements IModule {
         if (opts && opts.isMaster) {
             this.proxy = new ProfileProxy();
             // 用等级进行了模块屏蔽，用户最高等级只有99
-            this.level = 100;
+            this.level = 99;
         }
     }
 
@@ -114,5 +114,5 @@ let list = function (agent: MasterAgent, msg: any, cb: MasterCallback) {
     for (let sid in idMap) {
         servers.push(sid);
     }
-    cb(null, servers);
+    cb(null, servers); 
 };

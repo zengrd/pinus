@@ -6,7 +6,7 @@ Ext.onReady(function(){
 		id:'userStoreId',
 		autoLoad:false,
 		pageSize:5,
-		fields:['serverId','username','loginTime','uid','address'],
+		fields:['serverId','loginedCountPerServer','username','loginTime','uid','address'],
 		proxy: {
 			type: 'memory',
 			reader: {
@@ -26,8 +26,9 @@ Ext.onReady(function(){
 	    columns:[
 			{xtype:'rownumberer',width:50,sortable:false},
 			{text:'服务Id',width:150,dataIndex:'serverId'},
-			{text:'用户名',dataIndex:'username',width:100},
-			{text:'用户id',dataIndex:'uid',width:200},
+			{text:'当前服人数',width:150,dataIndex:'loginedCountPerServer'},
+			{text:'首个在线用户名',dataIndex:'username',width:100},
+			{text:'首个在线用户id',dataIndex:'uid',width:200},
 			{text:'客户端地址',dataIndex:'address',width:200},
 			{text:'登录时间',dataIndex:'loginTime',width:200}
 		]
@@ -84,14 +85,11 @@ setInterval(function() {
 		}
 
 		var totalConnCount = 0, loginedCount = 0, info, list = [];
-		msg = msg.body;
 		for(var sid in msg) {
 			info = msg[sid];
 
-			//totalConnCount += msg[sid].totalConnCount;
-			//loginedCount += msg[sid].loginedCount;
-
-            totalConnCount += msg[sid].loginedCount;
+			totalConnCount += msg[sid].totalConnCount;
+			loginedCount += msg[sid].loginedCount;
 
 			var users = {};
 			var lists = msg[sid].loginedList;
@@ -100,11 +98,11 @@ setInterval(function() {
 					var username = lists[i].uid.split('<-->')[0];
 					if(!users[username]) {
                         users[username] = 1;
-                        loginedCount++;
                     }
 					list.push({
 						address : lists[i].address,
 						serverId : sid,
+						loginedCountPerServer: msg[sid].loginedCount,
 						username : username,
 						loginTime : new Date(lists[i].loginTime).Format("yyyy-MM-dd hh:mm:ss"),
 						uid : lists[i].uid

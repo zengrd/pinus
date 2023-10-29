@@ -4,10 +4,9 @@ import { MasterAgent } from '../master/masterAgent';
 let HeapProfileType = 'HEAP';
 let CPUProfileType = 'CPU';
 
-/**
- * profileProxy管理，这里暂时不使用，后期如果要用再考虑修复
- * 如果pinus-robot机器人需要就进行修复
- *
+/** 
+ * profile 模块
+ * 
  * @api public
  */
 export class ProfileProxy {

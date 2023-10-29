@@ -126,7 +126,7 @@ function refresh(){
       console.error(err);
       return;
     }
- 
+	console.log(msg);
     // compose display data
     var data = [];
     var _msg = msg.body.dataArray;
