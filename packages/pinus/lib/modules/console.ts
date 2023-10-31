@@ -168,8 +168,8 @@ let kill = function (app: Application, agent: MasterAgent, msg: any, cb: MasterC
 };
 
 let stop = function (app: Application, agent: MasterAgent, msg: any, cb: MasterCallback) {
-    let serverIds = msg.serverTypes;
-    if (!!serverIds.length) {
+    let serverIds = msg.serverIds;
+    if (!!serverIds && !!serverIds.length) {
         let servers = app.getServers();
         app.set(Constants.RESERVED.STOP_SERVERS, serverIds);
         for (let i = 0; i < serverIds.length; i++) {
