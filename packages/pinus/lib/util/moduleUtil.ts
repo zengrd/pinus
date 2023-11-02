@@ -88,9 +88,8 @@ export function registerDefaultModules(isMaster: boolean, app: Application, clos
         app.registerAdmin(OnlineUserModule);
         app.registerAdmin(admin.modules.monitorLog, { path: pathUtil.getLogPath(app.getBase()) });
         app.registerAdmin(admin.modules.scripts, { app: app, path: pathUtil.getScriptPath(app.getBase()) });
-        if (os.platform() !== Constants.PLATFORM.WIN) {
-            app.registerAdmin(admin.modules.profiler, {'isMaster': isMaster});
-        }
+        // 最新v8-profiler-next模块已经支持windows、mac、linux三端
+        app.registerAdmin(admin.modules.profiler,{ path: pathUtil.getProfilePath(app.getBase()) });
     }
 }
 

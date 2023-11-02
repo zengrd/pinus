@@ -107,6 +107,16 @@ export function getScriptPath(appBase: string) {
 }
 
 /**
+ * Get admin profile root path.
+ *
+ * @param  {String} appBase application base path
+ * @return {String}         script path string
+ */
+export function getProfilePath(appBase: string) {
+    return path.join(appBase, Constants.DIR.PROFILE);
+}
+
+/**
  * Get logs path.
  *
  * @param  {String} appBase application base path

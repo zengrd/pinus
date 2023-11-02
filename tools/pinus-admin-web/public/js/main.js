@@ -115,11 +115,7 @@ Ext.onReady(function() {
 					if (!leaf) {
 						return;
 					}
-					if (id === 'profiler') {
-						var url = '/front/inspector.html?host=' + window.location.hostname + ':2337&page=0';
-					} else {
-						var url = '/module/' + id + '.html';
-					}
+					var url = '/module/' + id + '.html';
 					addIframe(title, url, id);
 
 				}

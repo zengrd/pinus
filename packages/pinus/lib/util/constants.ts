@@ -37,6 +37,7 @@ export enum DIR  {
     HANDLER = 'handler',
     LOG = '../logs', // pkg 打包后外置logs目录
     SCRIPT = '../scripts', // pkg打包后外置脚本目录
+    PROFILE = '../profiles', // v8-profiler-next 生成profile文件的路径
 }
 
 export enum RESERVED  {
