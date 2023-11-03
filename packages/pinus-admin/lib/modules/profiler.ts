@@ -10,7 +10,7 @@ import { IModule, MonitorCallback, MasterCallback } from '../consoleService';
 import { MonitorAgent } from '../monitor/monitorAgent';
 import { MasterAgent } from '../master/masterAgent';
 let profiler = require('v8-profiler-next');
-
+profiler.setGenerateType(1);
 
 
 export class ProfilerModule implements IModule {
@@ -28,7 +28,6 @@ export class ProfilerModule implements IModule {
         
         let title = `${serverId}-${type}`
         if (type === 'cpuprofile') {
-            profiler.setGenerateType(1);
             if (action === 'start') {
                 profiler.startProfiling(title, true);
                 cb(null, {result: `开始进行${type}...`});
@@ -44,7 +43,6 @@ export class ProfilerModule implements IModule {
             }
         }
         else if(type === 'heapprofile'){
-            profiler.setGenerateType(2);
             if (action === 'start') {
                 profiler.startSamplingHeapProfiling();
                 cb(null, {result: `开始进行${type}...`});
@@ -54,7 +52,6 @@ export class ProfilerModule implements IModule {
             }
         } 
         else if(type === 'heapsnapshot'){
-            profiler.setGenerateType(2);
             const snapshot = profiler.takeSnapshot()
             snapshot.export((error: any, result: any) => {
                 if(error){
