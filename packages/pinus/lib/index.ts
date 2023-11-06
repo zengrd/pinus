@@ -47,6 +47,8 @@ export * from './filters/handler/time';
 export * from './filters/handler/serial';
 export * from './filters/handler/timeout';
 
+export * from './master/starter';
+
 export {default as events} from './util/events';
 export * from './util/constants';
 export * from './util/utils';
