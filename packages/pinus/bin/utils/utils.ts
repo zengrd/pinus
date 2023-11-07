@@ -3,8 +3,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as util from 'util';
-import * as mkdirp from 'mkdirp';
-import { FILEREAD_ERROR, CONNECT_ERROR, MASTER_HA_NOT_FOUND, CLOSEAPP_INFO, KILL_CMD_WIN, KILL_CMD_LUX } from './constants';
+import { CONNECT_ERROR, KILL_MASTER_LUX, CLOSEAPP_INFO, KILL_CMD_WIN, KILL_CMD_LUX } from './constants';
 import * as utils from '../../lib/util/utils';
 import * as starter from '../../lib/master/starter';
 import * as constants from '../../lib/util/constants';
@@ -117,6 +116,8 @@ export function terminal(signal: string, opts: any) {
                 if (err) {
                     console.error(err);
                 }
+                // 把masterha的进程也给关掉
+                exec(KILL_MASTER_LUX);
                 if (signal === 'kill') {
                     if (msg.code === 'ok') {
                         console.log('All the servers have been terminated!');

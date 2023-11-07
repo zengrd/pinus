@@ -5,6 +5,7 @@
 export let TIME_INIT = 5 * 1000;
 export let TIME_KILL_WAIT = 5 * 1000;
 export let KILL_CMD_LUX = 'kill -9 `ps -ef|grep node|awk \'{print $2}\'`';
+export let KILL_MASTER_LUX = 'kill -9 `ps -ef|grep master-server-|awk \'{print $2}\'`';
 export let KILL_CMD_WIN = 'taskkill /im node.exe /f';
 
 export let CUR_DIR = process.cwd();
