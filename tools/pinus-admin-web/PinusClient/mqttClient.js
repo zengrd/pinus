@@ -100,11 +100,12 @@ MqttClient.prototype.connect = function(host, port, cb) {
     this.socket.on('close', function() {
         console.error('mqtt socket is close, remote server host: %s, port: %s', host, port);
         self.onSocketClose();
+        self.emit('close');
     });
 
     this.socket.on('error', function(err) {
         console.error('mqtt socket is error, remote server host: %s, port: %s', host, port);
-        // self.emit('error', new Error('[MqttClient] socket is error, remote server ' + host + ':' + port));
+        self.emit('error', new Error('[MqttClient] socket is error, remote server ' + host + ':' + port));
         self.onSocketClose();
     });
 

@@ -28,8 +28,8 @@ function WebServer()
             msg = protcol.parse(msg);
             if (topic === 'register')
             {
-                msg['host'] = config.host;
-                msg['port'] = config.port;
+                msg['host'] = config.master.host;
+                msg['port'] = config.master.port;
                 connectToMaster(msg.id, msg);
             }
             else
