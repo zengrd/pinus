@@ -1,4 +1,3 @@
-const net = require('net');
 const MqttCon = require('mqtt-connection');
 const config = require('./../config/adminConfig');
 const websocket = require('websocket-stream');
@@ -28,9 +27,18 @@ function WebServer()
             msg = protcol.parse(msg);
             if (topic === 'register')
             {
-                msg['host'] = config.master.host;
-                msg['port'] = config.master.port;
-                connectToMaster(msg.id, msg);
+                msg['master'] = JSON.parse(JSON.stringify(config.master));
+                initClient(msg);
+                connectToMaster(msg.id, msg, function(host, port){
+                    socket.publish({
+                        topic: 'register',
+                        payload: JSON.stringify({
+                            code: protcol.PRO_OK,
+                            host: host,
+                            port: port
+                        })
+                    });
+                });
             }
             else
             {
@@ -85,27 +93,43 @@ function WebServer()
     })
 }
 
-function connectToMaster(id, opts) {
+function connectToMaster(id, opts, cb) {
+    let server = opts.master.shift();
+    if(server){
+        
+        client.connect(id, server.host, server.port,function(err)
+        {
+            if(err) {
+                console.error(err);
+                connectToMaster(id, opts, cb);
+            }
+            else{
+                cb(server.host, server.port);
+                return;
+            }
+        });
+
+    }
+    else{
+        client = null;
+    }
+}
+
+function initClient(opts){
     client = new adminClient({username: opts.username, password: opts.password, md5: opts.md5});
-    client.connect(id, opts.host, opts.port,function(err)
-    {
-        if(err) {
-            client = null;
-            console.error(err);
-            process.exit(1);
-        }
-    });
-    client.on('error', function ()
-    {
-        client = null;
-    });
-    client.on('close', function ()
-    {
-        client = null;
-    });
     client.on('disconnect', function()
     {
-        client = null;
+        //client = null;
+    });
+
+    client.on('error', function()
+    {
+        //client = null;
+    });
+
+    client.on('close', function()
+    {
+        //client = null;
     });
 }
 

@@ -125,6 +125,13 @@ export function terminal(signal: string, opts: any) {
                         console.log('There may be some servers remained:', msg.serverIds);
                     }
                 }
+                if(signal === 'stop'){
+                    if (msg.status === 'all') {
+                        console.log('All the servers have been stopped!');
+                    } else {
+                        console.log('There may be some servers remained:');
+                    }
+                }
                 process.exit(0);
             });
     });

@@ -1305,7 +1305,6 @@ MqttClient.prototype.connect = function(host, port, mqtt, cb) {
 
         if (self.connectedTimes++ == 1) {
             self.emit('connect');
-            cb();
         } else {
             self.emit('reconnect');
         }
