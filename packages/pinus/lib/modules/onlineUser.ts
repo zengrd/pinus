@@ -61,6 +61,7 @@ export class OnlineUserModule implements IModule {
         let data = agent.get(OnlineUserModule.moduleId);
         if (!data) {
             data = {};
+            // 每5秒在内存保存一次数据
             agent.set(OnlineUserModule.moduleId, data);
         }
 
@@ -75,6 +76,7 @@ export class OnlineUserModule implements IModule {
      * @api public
      */
     clientHandler(agent: MasterAgent, msg: any, cb: MasterCallback) {
+        // 每5秒取一次数据，避免了重复计算的问题
         utils.invokeCallback(cb, null, agent.get(OnlineUserModule.moduleId));
     }
 
