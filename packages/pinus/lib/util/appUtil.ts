@@ -191,12 +191,16 @@ export interface ServerStartArgs extends ServerInfo {
     type ?: Constants.RESERVED.ALL;
     startId ?: string;
     main ?: string;
+    remoteLogger ?: string;
+    loggerHost ?: string;
+    loggerPort ?: string;
 }
 
 /**
  * Process server start command
  */
 let processArgs = function (app: Application, args: ServerStartArgs) {
+    console.log(args);
     let serverType = args.serverType || Constants.RESERVED.MASTER;
     let serverId = args?.id || app.getMaster().id;
     let mode = args.mode || Constants.RESERVED.CLUSTER;
@@ -221,6 +225,19 @@ let processArgs = function (app: Application, args: ServerStartArgs) {
     } else {
         app.set(Constants.RESERVED.CURRENT_SERVER, app.getMaster(), true);
     }
+
+    // 设置远程logger功能
+    let remoteLogger = args.remoteLogger;
+    let loggerHost = args.loggerHost || process.env.LOGGER_HOST || '127.0.0.1';
+    let loggerPort = args.loggerPort || process.env.LOGGER_PORT || '5000';
+    if(remoteLogger){
+        app.set(Constants.RESERVED.REMOTE_LOGGER, remoteLogger, true);
+        app.set(Constants.RESERVED.LOGGER_HOST, loggerHost, true);
+        app.set(Constants.RESERVED.LOGGER_PORT, loggerPort, true);
+        process.env.REMOTE_LOGGER = remoteLogger;
+        process.env.LOGGER_HOST = loggerHost;
+        process.env.LOGGER_PORT = loggerPort;
+    }
 };
 
 /**
@@ -242,7 +259,7 @@ let _checkCanRequire = (path: string) => {
  * Configure custom logger.
  */
 let configLogger = function (app: Application) {
-    if (process.env.POMELO_LOGGER !== 'off') {
+    if (process.env.PINUS_LOGGER !== 'off') {
         let env = app.get(Constants.RESERVED.ENV);
         let originPath = path.join(app.getBase(), Constants.FILEPATH.LOG);
         let presentPath = path.join(app.getBase(), Constants.FILEPATH.CONFIG_DIR, env, path.basename(Constants.FILEPATH.LOG));

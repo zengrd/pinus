@@ -220,12 +220,46 @@ function configure(configOrFilename: string | Config, opts?: { [key: string]: an
         initReloadConfiguration(filename, config.reloadSecs);
     }
 
-    // config object could not turn on the auto reload configure file in log4js
+    if (process.env.REMOTE_LOGGER === 'server') {
+        config = setRemoteServer(config);
 
+    } else if (process.env.REMOTE_LOGGER === 'client'){
+        config = setRemoteClient(config);
+    }
+
+    // config object could not turn on the auto reload configure file in log4js
+    console.log(config);
     log4js.configure(config);
     if (config.replaceConsole) {
         replaceConsole();
     }
+}
+
+function setRemoteClient(configObj: any){
+    if( typeof configObj === 'object'){
+        if(configObj.hasOwnProperty('appenders')){
+            for(let appender in configObj['appenders']){
+                configObj['appenders'][appender]["type"] = "tcp";
+                configObj['appenders'][appender]["host"] = process.env.LOGGER_HOST;
+                configObj['appenders'][appender]["port"] = parseInt(process.env.LOGGER_PORT);
+                delete configObj['appenders'][appender]["filename"];
+            }
+        }
+    }
+    return configObj;
+}
+
+function setRemoteServer(configObj: any){
+    if( typeof configObj === 'object'){
+        if(configObj.hasOwnProperty('appenders')){
+            configObj["appenders"]["server"] = {
+                type: "tcp-server",
+                host: process.env.LOGGER_HOST,
+                port: parseInt(process.env.LOGGER_PORT),
+            }
+        }
+    }
+    return configObj;
 }
 
 function replaceProperties(configObj: any, opts: any) {
