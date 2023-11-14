@@ -58,8 +58,6 @@ export enum RESERVED  {
     MODE = 'mode',
     TYPE = 'type',
     REMOTE_LOGGER = 'remoteLogger',
-    LOGGER_HOST = 'loggerHost',
-    LOGGER_PORT = 'loggerPort',
     CLUSTER = 'clusters',
     STAND_ALONE = 'stand-alone',
     BEFORE_START = 'beforeStart',

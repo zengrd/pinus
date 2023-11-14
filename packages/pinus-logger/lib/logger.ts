@@ -11,24 +11,33 @@ let funcs: { [key: string]: (name: string, opts: any) => string } = {
     'opts': doOpts
 };
 
-// 0 log  1 debug, 2 info, 3 warn, 4 error
-let logLevel = 0;
+
 
 // 支持动态更改日志级别
+let logLevel = 0;
 function setPinusLogLevel(newLevel: 0 | 1 | 2 | 3 | 4 | 5) {
     console.warn('change pinus log level:', newLevel, 'oldLevel:', logLevel);
     logLevel = newLevel;
 }
-
+// 监听暂停事件
 let log4jspause = false;
-
 process.on('log4js:pause' as any, (val: any) => {
     log4jspause = val;
 });
 
+// 设置远程的logger函数
+let getRemoteLogger = function(c: string) {return log4js.getLogger(c) as any};
+function setRemoteLoggerFunc(func: (c: string) => void){
+    getRemoteLogger = func;
+}
+
+
+
 function getLogger(...args: string[]) {
     let categoryName = args[0];
     let prefix = '';
+    let logger: any = {};
+    let pLogger: any = {};
     for (let i = 1; i < args.length; i++) {
         if (i !== args.length - 1)
             prefix = prefix + args[i] + '] [';
@@ -39,14 +48,19 @@ function getLogger(...args: string[]) {
         // category name is __filename then cut the prefix path
         categoryName = categoryName.replace(process.cwd(), '');
     }
-    let logger = log4js.getLogger(categoryName) as any;
-    let pLogger: any = {};
+    if(process.env.REMOTE_LOGGER === 'worker'){
+        logger = getRemoteLogger(categoryName) as any;
+    }
+    else{
+        logger = log4js.getLogger(categoryName) as any;
+    }
+    
     Object.setPrototypeOf(pLogger, logger);
     for (let key in logger) {
         pLogger[key] = logger[key];
     }
 
-    ['log', 'debug', 'info', 'warn', 'error', 'trace', 'fatal'].forEach((item, idx) => {
+    ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'mark'].forEach((item, idx) => {
         pLogger[item] = function () {
             // 从根源过滤日志级别
             if (idx < logLevel || log4jspause) {
@@ -220,46 +234,16 @@ function configure(configOrFilename: string | Config, opts?: { [key: string]: an
         initReloadConfiguration(filename, config.reloadSecs);
     }
 
-    if (process.env.REMOTE_LOGGER === 'server') {
-        config = setRemoteServer(config);
-
-    } else if (process.env.REMOTE_LOGGER === 'client'){
-        config = setRemoteClient(config);
+    if (process.env.REMOTE_LOGGER === 'worker') {
+        return config;
     }
 
     // config object could not turn on the auto reload configure file in log4js
-    console.log(config);
     log4js.configure(config);
     if (config.replaceConsole) {
         replaceConsole();
     }
-}
-
-function setRemoteClient(configObj: any){
-    if( typeof configObj === 'object'){
-        if(configObj.hasOwnProperty('appenders')){
-            for(let appender in configObj['appenders']){
-                configObj['appenders'][appender]["type"] = "tcp";
-                configObj['appenders'][appender]["host"] = process.env.LOGGER_HOST;
-                configObj['appenders'][appender]["port"] = parseInt(process.env.LOGGER_PORT);
-                delete configObj['appenders'][appender]["filename"];
-            }
-        }
-    }
-    return configObj;
-}
-
-function setRemoteServer(configObj: any){
-    if( typeof configObj === 'object'){
-        if(configObj.hasOwnProperty('appenders')){
-            configObj["appenders"]["server"] = {
-                type: "tcp-server",
-                host: process.env.LOGGER_HOST,
-                port: parseInt(process.env.LOGGER_PORT),
-            }
-        }
-    }
-    return configObj;
+    return config;
 }
 
 function replaceProperties(configObj: any, opts: any) {
@@ -352,4 +336,5 @@ export
     getLogger,
     configure,
     setPinusLogLevel,
+    setRemoteLoggerFunc,
 };

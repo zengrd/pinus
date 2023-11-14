@@ -226,17 +226,11 @@ let processArgs = function (app: Application, args: ServerStartArgs) {
         app.set(Constants.RESERVED.CURRENT_SERVER, app.getMaster(), true);
     }
 
-    // 设置远程logger功能
+    // 设置远程logger的模式
     let remoteLogger = args.remoteLogger;
-    let loggerHost = args.loggerHost || process.env.LOGGER_HOST || '127.0.0.1';
-    let loggerPort = args.loggerPort || process.env.LOGGER_PORT || '5000';
     if(remoteLogger){
         app.set(Constants.RESERVED.REMOTE_LOGGER, remoteLogger, true);
-        app.set(Constants.RESERVED.LOGGER_HOST, loggerHost, true);
-        app.set(Constants.RESERVED.LOGGER_PORT, loggerPort, true);
         process.env.REMOTE_LOGGER = remoteLogger;
-        process.env.LOGGER_HOST = loggerHost;
-        process.env.LOGGER_PORT = loggerPort;
     }
 };
 
