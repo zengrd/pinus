@@ -25,8 +25,8 @@ process.on('log4js:pause' as any, (val: any) => {
     log4jspause = val;
 });
 
-// 设置远程的logger函数
-let getRemoteLogger = function(c: string) {return log4js.getLogger(c) as any};
+// 设置远程的logger
+let getRemoteLogger = function(c: string, prefix?: string) {return log4js.getLogger(c) as any};
 function setRemoteLoggerFunc(func: (c: string) => void){
     getRemoteLogger = func;
 }
@@ -49,7 +49,7 @@ function getLogger(...args: string[]) {
         categoryName = categoryName.replace(process.cwd(), '');
     }
     if(process.env.REMOTE_LOGGER === 'worker'){
-        logger = getRemoteLogger(categoryName) as any;
+        logger = getRemoteLogger(categoryName, prefix) as any;
     }
     else{
         logger = log4js.getLogger(categoryName) as any;
@@ -233,11 +233,11 @@ function configure(configOrFilename: string | Config, opts?: { [key: string]: an
     if (filename && config && config.reloadSecs) {
         initReloadConfiguration(filename, config.reloadSecs);
     }
-
+    /*
     if (process.env.REMOTE_LOGGER === 'worker') {
         return config;
     }
-
+    */
     // config object could not turn on the auto reload configure file in log4js
     log4js.configure(config);
     if (config.replaceConsole) {
