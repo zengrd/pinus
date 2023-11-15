@@ -1,5 +1,5 @@
 import * as log4js from 'log4js';
-import { Configuration } from 'log4js';
+import { Configuration, Logger } from 'log4js';
 
 import * as fs from 'fs';
 import * as util from 'util';
@@ -16,7 +16,7 @@ let funcs: { [key: string]: (name: string, opts: any) => string } = {
 // 支持动态更改日志级别
 let logLevel = 0;
 function setPinusLogLevel(newLevel: 0 | 1 | 2 | 3 | 4 | 5) {
-    console.warn('change pinus log level:', newLevel, 'oldLevel:', logLevel);
+    console.debug('change pinus log level:', newLevel, 'oldLevel:', logLevel);
     logLevel = newLevel;
 }
 // 监听暂停事件
@@ -32,9 +32,15 @@ function setRemoteLoggerFunc(func: (c: string) => void){
     getRemoteLogger = func;
 }
 
-function getLog4jsLogger(){
-    return log4js.getLogger;
+function getLog4jsLogger(c: string){
+    return log4js.getLogger(c) as any;
 }
+
+
+let proxyLogger: any = {
+
+};
+
 
 
 
@@ -42,7 +48,7 @@ function getLogger(...args: string[]) {
     let categoryName = args[0];
     let prefix = '';
     let logger: any = {};
-    let pLogger: any = {};
+
     for (let i = 1; i < args.length; i++) {
         if (i !== args.length - 1)
             prefix = prefix + args[i] + '] [';
@@ -53,20 +59,10 @@ function getLogger(...args: string[]) {
         // category name is __filename then cut the prefix path
         categoryName = categoryName.replace(process.cwd(), '');
     }
-    if(process.env.REMOTE_LOGGER === 'worker'){
-        logger = getRemoteLogger(categoryName, prefix) as any;
-    }
-    else{
-        logger = log4js.getLogger(categoryName) as any;
-    }
-    
-    Object.setPrototypeOf(pLogger, logger);
-    for (let key in logger) {
-        pLogger[key] = logger[key];
-    }
 
+    logger = log4js.getLogger(categoryName) as any;
     ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'mark'].forEach((item, idx) => {
-        pLogger[item] = function () {
+        proxyLogger[item]= function () {
             // 从根源过滤日志级别
             if (idx < logLevel || log4jspause) {
                 return;
@@ -97,7 +93,7 @@ function getLogger(...args: string[]) {
             logger[item].apply(logger, arguments);
         };
     });
-    return pLogger as log4js.Logger;
+    return proxyLogger;
 }
 
 let configState: { [key: string]: any } = {};
