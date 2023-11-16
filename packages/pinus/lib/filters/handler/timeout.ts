@@ -3,8 +3,8 @@
  * Print a warn information when request timeout.
  */
 import {getLogger} from 'pinus-logger';
-
-let logger = getLogger('pinus', __filename);
+import * as path from 'path';
+let logger = getLogger('pinus', path.basename(__filename));
 import * as  utils from '../../util/utils';
 import {IHandlerFilter} from '../../interfaces/IHandlerFilter';
 import {RouteRecord} from '../../util/constants';

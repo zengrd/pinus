@@ -37,11 +37,9 @@ function getLog4jsLogger(c: string){
 }
 
 
+// 也可以用类生成对象，直接用对象减少语法问题，所有logger代理对象
 let proxyLogger: any = {
-
 };
-
-
 
 
 function getLogger(...args: string[]) {
@@ -60,9 +58,21 @@ function getLogger(...args: string[]) {
         categoryName = categoryName.replace(process.cwd(), '');
     }
 
-    logger = log4js.getLogger(categoryName) as any;
+
+    if(process.env.REMOTE_LOGGER === 'worker'){
+        logger = getRemoteLogger(categoryName, prefix)
+    }
+    else{
+        logger = log4js.getLogger(categoryName) as any;
+    }
+
+    if(!proxyLogger[categoryName]){
+        proxyLogger[categoryName] = {}
+    }
+    proxyLogger[categoryName][prefix] = {};
+
     ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'mark'].forEach((item, idx) => {
-        proxyLogger[item]= function () {
+        proxyLogger[categoryName][prefix][item]= function () {
             // 从根源过滤日志级别
             if (idx < logLevel || log4jspause) {
                 return;
@@ -87,14 +97,18 @@ function getLogger(...args: string[]) {
             if (args.length) {
                 arguments[0] = p + arguments[0];
             }
+
             if (item === 'error' && process.env.ERROR_STACK) {
                 arguments[0] += (new Error()).stack;
             }
             logger[item].apply(logger, arguments);
         };
     });
-    return proxyLogger;
+    return proxyLogger[categoryName][prefix];
 }
+
+
+
 
 let configState: { [key: string]: any } = {};
 
@@ -335,4 +349,5 @@ export
     setPinusLogLevel,
     setRemoteLoggerFunc,
     getLog4jsLogger,
+    proxyLogger
 };

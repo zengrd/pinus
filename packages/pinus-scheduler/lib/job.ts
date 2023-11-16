@@ -4,7 +4,9 @@
 import * as cronTrigger from './cronTrigger';
 import * as simpleTrigger from './simpleTrigger';
 import { SimpleTriggerOpts } from './simpleTrigger';
-import { getLogger } from 'log4js';
+import { getLogger } from 'pinus-logger';
+import * as path from 'path';
+let logger = getLogger('pinus-scheduler', path.basename(__filename));
 
 let jobId = 1;
 
@@ -13,9 +15,6 @@ let CRON_JOB = 2;
 let jobCount = 0;
 
 let warnLimit = 500;
-
-let logger = getLogger(__filename);
-
 
 // For test
 let lateCount = 0;

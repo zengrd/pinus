@@ -1,9 +1,10 @@
 import * as async from 'async';
+import * as path from 'path';
 import * as utils from '../../util/utils';
 import { getLogger } from 'pinus-logger';
-let logger = getLogger('pinus', __filename);
-let transactionLogger = getLogger('transaction-log', __filename);
-let transactionErrorLogger = getLogger('transaction-error-log', __filename);
+let logger = getLogger('pinus', path.basename(__filename));
+let transactionLogger = getLogger('transaction-log', path.basename(__filename));
+let transactionErrorLogger = getLogger('transaction-error-log', path.basename(__filename));
 
 export type TransactionCondictionFunction = (cb: (err ?: Error) => void) => void;
 export type TransactionHandlerFunction = (cb: (err ?: Error) => void) => void;
