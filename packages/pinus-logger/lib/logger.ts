@@ -60,16 +60,18 @@ function getLogger(...args: string[]) {
 
 
     if(process.env.REMOTE_LOGGER === 'worker'){
-        logger = getRemoteLogger(categoryName, prefix)
+        logger = getRemoteLogger(categoryName, prefix) as any;
     }
     else{
         logger = log4js.getLogger(categoryName) as any;
     }
 
     if(!proxyLogger[categoryName]){
-        proxyLogger[categoryName] = {}
+        proxyLogger[categoryName] = {};
     }
-    proxyLogger[categoryName][prefix] = {};
+    if(!proxyLogger[categoryName][prefix]){
+        proxyLogger[categoryName][prefix] = {};
+    }
 
     ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'mark'].forEach((item, idx) => {
         proxyLogger[categoryName][prefix][item]= function () {
