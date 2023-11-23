@@ -16,7 +16,6 @@ let funcs: { [key: string]: (name: string, opts: any) => string } = {
 // 支持动态更改日志级别
 let logLevel = 0;
 function setPinusLogLevel(newLevel: 0 | 1 | 2 | 3 | 4 | 5) {
-    console.debug('change pinus log level:', newLevel, 'oldLevel:', logLevel);
     logLevel = newLevel;
 }
 // 监听暂停事件
@@ -73,7 +72,7 @@ function getLogger(...args: string[]) {
         proxyLogger[categoryName][prefix] = {};
     }
 
-    ['trace', 'debug', 'info', 'warn', 'error', 'fatal', 'mark'].forEach((item, idx) => {
+    ['log', 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'mark'].forEach((item, idx) => {
         proxyLogger[categoryName][prefix][item]= function () {
             // 从根源过滤日志级别
             if (idx < logLevel || log4jspause) {
@@ -103,7 +102,13 @@ function getLogger(...args: string[]) {
             if (item === 'error' && process.env.ERROR_STACK) {
                 arguments[0] += (new Error()).stack;
             }
-            logger[item].apply(logger, arguments);
+            if (item === 'log'){
+                logger[item].call(logger, 'debug', ...arguments);
+            }
+            else{
+                logger[item].apply(logger, arguments);
+            }
+            
         };
     });
     return proxyLogger[categoryName][prefix];
@@ -160,11 +165,12 @@ declare global {
 
 function replaceConsole() {
     const logger = getLogger('logger', 'console');
-    console.debug = logger.debug.bind(logger);
-    console.log = logger.info.bind(logger);
-    console.warn = logger.warn.bind(logger);
-    console.error = logger.error.bind(logger);
-    console.trace = logger.trace.bind(logger);
+    //console.debug = logger.debug.bind(logger);
+    //console.log = logger.info.bind(logger);
+    //console.warn = logger.warn.bind(logger);
+    //console.error = logger.error.bind(logger);
+    //console.trace = logger.trace.bind(logger);
+    console = logger;
 }
 
 function configureOnceOff(config: Config) {
