@@ -102,13 +102,8 @@ function getLogger(...args: string[]) {
             if (item === 'error' && process.env.ERROR_STACK) {
                 arguments[0] += (new Error()).stack;
             }
-            if (item === 'log'){
-                logger[item].call(logger, 'debug', ...arguments);
-            }
-            else{
-                logger[item].apply(logger, arguments);
-            }
             
+            logger[item].apply(logger, arguments);
         };
     });
     return proxyLogger[categoryName][prefix];
