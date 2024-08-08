@@ -53,26 +53,29 @@
 		"url": "https://github.com/node-pinus/pinus.git"
 	},
 	"engines": {
-        "node": ">=18.15.0"
+		"node": ">=18.15.0"
 	},
 	"license": "MIT",
 	"private": true,
 	"workspaces": [
 		"tools/*",
 		"plugins/*",
-        "packages/pinus",
-        "packages/pinus-admin",
-        "packages/pinus-loader",
-        "packages/pinus-logger",
-        "packages/pinus-monitor",
-        "packages/pinus-protobuf",
-        "packages/pinus-protocol",
-        "packages/pinus-rpc",
-        "packages/pinus-scheduler",
+		"packages/pinus",
+		"packages/pinus-admin",
+		"packages/pinus-loader",
+		"packages/pinus-logger",
+		"packages/pinus-monitor",
+		"packages/pinus-protobuf",
+		"packages/pinus-protocol",
+		"packages/pinus-rpc",
+		"packages/pinus-scheduler",
 		"examples/simple-example/*",
 		"examples/ssl-connector/*",
 		"examples/websocket-chat/*",
 		"examples/websocket-chat-ts-run/*",
 		"examples/robot-sample"
-	]
+	],
+	"dependencies": {
+		"yarn": "^1.22.21"
+	}
 }

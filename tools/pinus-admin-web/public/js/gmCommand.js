@@ -171,7 +171,7 @@ var run = function() {
 	var argsType = gmObject[command].argsType;
 	if(argsType&& argsType.length > 1){
 		var length = argsType.length
-		const parts = args.split(',', length);
+		const parts = args.split(' ', length);
 		if(parts.length !== length){
 			alert('指令参数输入个数不正确');
 			return;
@@ -198,7 +198,7 @@ var setDesc = function(key) {
 	var desc = gmObject[key].desc;
 	var argsType = gmObject[key].argsType;
 	if(argsType&&argsType.length > 1){
-		desc = desc + ', 参数类型：' + argsType + ', 多个参数按英文逗号分割'
+		desc = desc + ', 参数类型：' + argsType + ', 多个参数按空格分割'
 	}
 	else{
 		desc = desc + ', 输入参数：'
