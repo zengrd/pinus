@@ -141,9 +141,9 @@ export class TCPMailBox extends EventEmitter implements IMailBox {
             this._interval = null;
         }
         if(Object.keys(this.timer).length) {
-            clearTimeout(this.timer['ping']);
+            clearTimeout(this.timer['ping'] as unknown as NodeJS.Timeout);
             this.timer['ping'] = null;
-            clearTimeout(this.timer['pong']);
+            clearTimeout(this.timer['pong'] as unknown as NodeJS.Timeout);
             this.timer['pong'] = null;
         }
         if (this.socket) {
@@ -217,7 +217,7 @@ export class TCPMailBox extends EventEmitter implements IMailBox {
         if(!this.ping) return;
 
         if(this.timer['pong']) {
-            clearTimeout(this.timer['pong']);
+            clearTimeout(this.timer['pong'] as unknown as NodeJS.Timeout);
             this.timer['pong'] = null;
         }
 
@@ -233,7 +233,7 @@ export class TCPMailBox extends EventEmitter implements IMailBox {
          */
         function pong() {
             if(self.timer['pong']) {
-                clearTimeout(self.timer['pong']);
+                clearTimeout(self.timer['pong'] as unknown as NodeJS.Timeout);
                 self.timer['pong'] = null;
             }
 
@@ -248,7 +248,7 @@ export class TCPMailBox extends EventEmitter implements IMailBox {
          */
         function ping() {
             if(self.timer['ping']) {
-                clearTimeout(self.timer['ping']);
+                clearTimeout(self.timer['ping'] as unknown as NodeJS.Timeout);
                 self.timer['ping'] = null;
             }
             self.socket.write(self.composer.compose(PING));
@@ -308,7 +308,7 @@ export class TCPMailBox extends EventEmitter implements IMailBox {
             logger.warn('timer not exists, id: %s', id);
             return;
         }
-        clearTimeout(this.timeout[id]);
+        clearTimeout(this.timeout[id] as unknown as NodeJS.Timeout);
         delete this.timeout[id];
     }
 }

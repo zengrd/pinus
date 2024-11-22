@@ -17,7 +17,7 @@
     "ci": "yarn run test",
     "mochatest": "cd dist && mocha --require source-map-support/register --recursive",
     "gen-api-ref": "node ../../node_modules/typedoc/bin/typedoc --mode file --hideGenerator --excludeExternals --ignoreCompilerErrors --out ../../run/site/public/api-reference/pinus lib/",
-    "pkg": "tsc && pkg . --out-path=pkg-dist/"
+    "pkg": "tsc && pkg .  --target node22 --out-path=pkg-dist/"
   },
   "engines": {
     "node": ">=18.16.0"

@@ -4,11 +4,11 @@
  * Module dependencies.
  */
 import * as fs from 'fs';
-import * as os from 'os';
-import * as path from 'path';
+import * as process from 'process';
 import { COMMAND_ERROR } from './utils/constants';
 import { version } from './utils/utils';
 import * as program from 'commander';
+
 
 program.version(version);
 

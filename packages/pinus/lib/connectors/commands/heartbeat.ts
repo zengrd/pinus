@@ -68,7 +68,7 @@ export class HeartbeatCommand {
     clear(id: number) {
         let tid = this.timeouts[id];
         if (tid) {
-            clearTimeout(tid);
+            clearTimeout(tid as unknown as NodeJS.Timeout);
             delete this.timeouts[id];
         }
     }
@@ -76,7 +76,7 @@ export class HeartbeatCommand {
         delete this.clients[id];
         let tid = this.timeouts[id];
         if (tid) {
-            clearTimeout(tid);
+            clearTimeout(tid as unknown as NodeJS.Timeout);
             delete this.timeouts[id];
         }
     }

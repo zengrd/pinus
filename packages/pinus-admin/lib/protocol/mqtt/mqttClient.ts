@@ -148,8 +148,8 @@ export class MqttClient extends EventEmitter {
             return;
         }
 
-        clearInterval(this.keepaliveTimer);
-        clearTimeout(this.timeoutId);
+        clearInterval(this.keepaliveTimer as unknown as NodeJS.Timeout);
+        clearTimeout(this.timeoutId as unknown as NodeJS.Timeout);
         this.keepaliveTimer = null;
         this.lastPing = -1;
         this.lastPong = -1;
@@ -199,8 +199,8 @@ export class MqttClient extends EventEmitter {
     }
 
     setupKeepAlive() {
-        clearTimeout(this.reconnectId);
-        clearTimeout(this.timeoutId);
+        clearTimeout(this.reconnectId as unknown as NodeJS.Timeout);
+        clearTimeout(this.timeoutId as unknown as NodeJS.Timeout);
 
         let self = this;
         this.keepaliveTimer = setInterval(function () {
@@ -237,8 +237,8 @@ export class MqttClient extends EventEmitter {
         this.connected = false;
         this.closed = true;
         // 取消定时
-        clearTimeout(this.reconnectId);
-        clearTimeout(this.timeoutId);
+        clearTimeout(this.reconnectId as unknown as NodeJS.Timeout);
+        clearTimeout(this.timeoutId as unknown as NodeJS.Timeout);
         // 主动断线时，socket已关闭被置null的可能
         if (this.socket) {
             this.socket.disconnect();

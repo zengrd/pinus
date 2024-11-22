@@ -28,7 +28,7 @@ export class BufferPushScheduler {
 
     async stop() {
         if (this.tid) {
-            clearInterval(this.tid);
+            clearInterval(this.tid as unknown as NodeJS.Timeout);
             this.tid = null;
         }
     }

@@ -40,7 +40,7 @@ export class TimeoutFilter implements IHandlerFilter {
     after(err: Error, routeRecord: RouteRecord, msg: any, session: FrontendOrBackendSession, resp: any, next: HandlerCallback) {
         let timeout = this.timeouts[(session as any).__timeout__];
         if (timeout) {
-            clearTimeout(timeout);
+            clearTimeout(timeout as unknown as NodeJS.Timeout);
             this.timeOutCount--;
             this.timeouts[(session as any).__timeout__] = undefined;
         }

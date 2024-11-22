@@ -9,8 +9,14 @@ import * as fs from 'fs';
 import { IModule, MonitorCallback, MasterCallback } from '../consoleService';
 import { MonitorAgent } from '../monitor/monitorAgent';
 import { MasterAgent } from '../master/masterAgent';
-let profiler = require('v8-profiler-next');
-profiler.setGenerateType(1);
+
+let profiler: any = null;
+try {
+    profiler = require('v8-profiler-next');
+    profiler.setGenerateType(1);
+} catch (e) {
+    logger.warn('目前node版本不支持v8-profiler-next模块');
+}
 
 
 export class ProfilerModule implements IModule {
@@ -24,6 +30,11 @@ export class ProfilerModule implements IModule {
     }
 
     monitorHandler(agent: MonitorAgent, msg: any, cb: MonitorCallback) {
+        if (!profiler) {
+            cb(new Error('目前node版本不支持v8-profiler-next模块'));
+            return;
+        }
+
         let type = msg.type, action = msg.action, serverId = msg.serverId, result = null;
         
         let title = `${serverId}-${type}`

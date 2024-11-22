@@ -19,3 +19,4 @@ coverage.html
 .idea/*
 dist/
 pkg-dist/
+sea-dist/

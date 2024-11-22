@@ -125,7 +125,7 @@ export class TCPAcceptor extends EventEmitter implements IAcceptor {
                 delete this.sockets[socket.id];
                 delete this.msgQueues[socket.id];
                 if(this.timer[socket.id]) {
-                    clearTimeout(this.timer[socket.id]);
+                    clearTimeout(this.timer[socket.id] as unknown as NodeJS.Timeout);
                 }
                 delete this.timer[socket.id];
             });
@@ -165,7 +165,7 @@ export class TCPAcceptor extends EventEmitter implements IAcceptor {
             // if no pkg come
             // remove listener on socket,close socket
             if(self.timer[socketId]) {
-                clearInterval(self.timer[socketId]);
+                clearInterval(self.timer[socketId] as unknown as NodeJS.Timeout);
                 self.timer[socketId] = null;
             }
 

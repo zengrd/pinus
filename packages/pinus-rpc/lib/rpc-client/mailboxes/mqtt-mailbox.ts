@@ -82,7 +82,7 @@ export class MailBox extends EventEmitter implements IMailBox {
                     return;
                 }
 
-                clearTimeout(connectTimeout);
+                clearTimeout(connectTimeout as unknown as NodeJS.Timeout);
                 if(self._errored) {
                     cb(new Error('mqtt-mailbox errored'));
                     return;
@@ -147,7 +147,7 @@ export class MailBox extends EventEmitter implements IMailBox {
         this.closed = true;
         this.connected = false;
         if (this._interval) {
-            clearInterval(this._interval);
+            clearInterval(this._interval as unknown as NodeJS.Timeout);
             this._interval = null;
         }
         this.socket.destroy();
@@ -289,7 +289,7 @@ export class MailBox extends EventEmitter implements IMailBox {
             logger.warn('timer is not exsits, serverId: %s remote: %s, host: %s, port: %s', this.serverId, id, this.host, this.port);
             return;
         }
-        clearTimeout(this.timeout[id]);
+        clearTimeout(this.timeout[id] as unknown as NodeJS.Timeout);
         delete this.timeout[id];
     }
 

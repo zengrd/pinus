@@ -53,9 +53,9 @@ export class RobustMqttClient extends MqttClient {
         this.connected = false;
         this.closed = true;
         // 取消定时
-        clearInterval(this.keepaliveTimer);
-        clearTimeout(this.timeoutId);
-        clearTimeout(this.reconnectId);
+        clearInterval(this.keepaliveTimer as unknown as NodeJS.Timeout);
+        clearTimeout(this.timeoutId as unknown as NodeJS.Timeout);
+        clearTimeout(this.reconnectId as unknown as NodeJS.Timeout);
         // 重置
         this.lastPing = -1;
         this.lastPong = -1;
